@@ -1,1 +1,1 @@
-# sgv2-filter
+# SteamGifts v2 Giveaway Filter
