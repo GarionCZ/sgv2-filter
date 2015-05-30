@@ -1,6 +1,8 @@
 // ==UserScript==
 // @name        SteamGifts v2 Giveaway Filter
 // @namespace   com.steamgifts.v2.giveawayfilter
+// @description Giveaway filter for SteamGifts v2
+// @author      Garion
 // @include     http://www.steamgifts.com/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/blob/master/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/blob/master/sgv2-filter.meta.js
