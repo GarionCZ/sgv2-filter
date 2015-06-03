@@ -131,11 +131,12 @@ function filterGiveaways() {
 
 // Parses the giveaway elements from the whole page
 function getGiveaways() {
-  var giveaways = document.getElementsByClassName("SGPP__gridTile");
-  if (giveaways.length === 0) {
-    giveaways = document.getElementsByClassName("giveaway__row-outer-wrap");
-  }
-  return giveaways;
+  var giveawaysSgpp = document.getElementsByClassName("SGPP__gridTile");
+  var giveaways = document.getElementsByClassName("giveaway__row-outer-wrap");
+  var allGiveaways = [];
+  allGiveaways.push.apply(allGiveaways, giveawaysSgpp);
+  allGiveaways.push.apply(allGiveaways, giveaways);
+  return allGiveaways;
 }
 
 // Returns true if the giveaway is for a whitelist, false otherwise
