@@ -4,9 +4,9 @@
 // @description Giveaway filter for SteamGifts v2
 // @author      Garion
 // @include     http://www.steamgifts.com/*
-// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
-// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
-// @version     0.2-BETA
+// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/beta/sgv2-filter.user.js
+// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/beta/sgv2-filter.meta.js
+// @version     0.2.1-BETA
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -131,11 +131,12 @@ function filterGiveaways() {
 
 // Parses the giveaway elements from the whole page
 function getGiveaways() {
-  var giveaways = document.getElementsByClassName("SGPP__gridTile");
-  if (giveaways.length === 0) {
-    giveaways = document.getElementsByClassName("giveaway__row-outer-wrap");
-  }
-  return giveaways;
+  var giveawaysSgpp = document.getElementsByClassName("SGPP__gridTile");
+  var giveaways = document.getElementsByClassName("giveaway__row-outer-wrap");
+  var allGiveaways = [];
+  allGiveaways.push.apply(allGiveaways, giveawaysSgpp);
+  allGiveaways.push.apply(allGiveaways, giveaways);
+  return allGiveaways;
 }
 
 // Returns true if the giveaway is for a whitelist, false otherwise
