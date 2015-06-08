@@ -52,13 +52,13 @@ function filterGiveaways() {
   if (!isFilteringEnabledOnCurrentPage()) {
     // Since it's not enabled, remove any possible filtering
     var giveaways = getGiveaways();
-    for (i = 0; i < giveaways.length; i++) {
+    for ( i = 0; i < giveaways.length; i++) {
       removeFiltering(giveaways[i]);
     }
     handlePinnedBlock();
     return;
   }
-  
+
   // Dirty hack to "fix" endless scrolling in SG++ when a lot of GAs on the same page got removed
   window.scrollBy(0, 1);
   window.scrollBy(0, -1);
@@ -70,41 +70,41 @@ function filterGiveaways() {
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
- 
+
   var giveawaysToRemove = [];
   var giveaways = getGiveaways();
-  for (i = 0; i < giveaways.length; i++) {
+  for ( i = 0; i < giveaways.length; i++) {
     // Remove the filtering
     removeFiltering(giveaways[i]);
-      
+
     // Handle whitelist giveaways
     if (excludeWhitelistGiveaways) {
       if (isGiveawayFromWhitelist(giveaways[i])) {
         continue;
       }
     }
-   
+
     // Handle group giveaways
     if (excludeGroupGiveaways) {
       if (isGiveawayFromGroup(giveaways[i])) {
         continue;
       }
     }
-    
+
     // Handle pinned giveaways
     if (excludePinnedGiveaways) {
       if (isGiveawayPinned(giveaways[i])) {
         continue;
       }
     }
-   
+
     // Evaluate the contributor level
     var contributorLevel = getContributorLevel(giveaways[i]);
     if (contributorLevel < minLevelToDisplay || contributorLevel > maxLevelToDisplay) {
       giveawaysToRemove.push(giveaways[i]);
       continue;
     }
-    
+
     // Handle entry-count filtering
     if (enableFilteringByEntryCount) {
       var numberOfEntries = getNumberOfEntries(giveaways[i]);
@@ -114,19 +114,19 @@ function filterGiveaways() {
       }
     }
   }
- 
+
   // Remove the giveaways
-  for (i = 0; i < giveawaysToRemove.length; i++) {
+  for ( i = 0; i < giveawaysToRemove.length; i++) {
     giveawaysToRemove[i].style.display = "none";
   }
-    
+
   // Handle the pinned giveaways block
   handlePinnedBlock();
-  
+
   // Dirty hack to "fix" endless scrolling in SG++ when a lot of GAs on the same page got removed
   window.scrollBy(0, 1);
   window.scrollBy(0, -1);
- 
+
 }
 
 // Parses the giveaway elements from the whole page
@@ -163,16 +163,16 @@ function getContributorLevel(giveaway) {
     return 0;
   }
   var contributorLevel = contributorLevels[0].innerHTML;
-  
+
   var substringStart = 0;
   // Remove the "Level " at the start of the string, if present (SG++ grid view doesn't have it)
   if (contributorLevel.indexOf("Level ") === 0) {
     substringStart = 6;
   }
-  
+
   // Parse the level, remove the "+" from the end
-  var level = contributorLevel.substring(substringStart, contributorLevel.length-1);
-  
+  var level = contributorLevel.substring(substringStart, contributorLevel.length - 1);
+
   return level;
 }
 
@@ -180,20 +180,20 @@ function getContributorLevel(giveaway) {
 function getNumberOfEntries(giveaway) {
   // Parse from SGv2 layout
   var spanElements = giveaway.getElementsByTagName("span");
-  for (j = 0; j < spanElements.length; j++) {
+  for ( j = 0; j < spanElements.length; j++) {
     if (spanElements[j].innerHTML.indexOf("entr") != -1) {
-      return parseInt(spanElements[j].innerHTML.substring(0, spanElements[j].innerHTML.indexOf(" ")).replace(",",""));    
+      return parseInt(spanElements[j].innerHTML.substring(0, spanElements[j].innerHTML.indexOf(" ")).replace(",", ""));
     }
   }
 
   // Parse from SG++ grid layout
   var divElements = giveaway.getElementsByTagName("div");
-  for (j = 0; j < divElements.length; j++) {
+  for ( j = 0; j < divElements.length; j++) {
     if (divElements[j].style.cssFloat == "left" && divElements[j].innerHTML.indexOf("ntr") != -1) {
       var strongElements = divElements[j].getElementsByTagName("strong");
       // Just pick first, there is only one anyway
       if (strongElements.length > 0) {
-        return parseInt(strongElements[0].innerHTML.replace(",",""));
+        return parseInt(strongElements[0].innerHTML.replace(",", ""));
       }
     }
   }
@@ -209,20 +209,20 @@ function handlePinnedBlock() {
   var pinnedBlock = document.getElementsByClassName("pinned-giveaways__outer-wrap")[0];
   var pinnedGiveaways = pinnedBlock.getElementsByClassName("giveaway__row-outer-wrap");
   var giveawayRemaining = false;
-  
-  for (i = 0; i < pinnedGiveaways.length; i++) {
+
+  for ( i = 0; i < pinnedGiveaways.length; i++) {
     if (pinnedGiveaways[i].style.display !== "none") {
       giveawayRemaining = true;
       break;
     }
   }
-  
+
   if (giveawayRemaining) {
     pinnedBlock.style.display = "";
   } else {
     pinnedBlock.style.display = "none";
   }
-  
+
 }
 
 // Returns true if filtering is enabled on the current page, false otherwise
@@ -234,27 +234,27 @@ function isFilteringEnabledOnCurrentPage() {
   var applyToUserProfileView = GM_getValue(KEY_APPLY_TO_USER_PROFILE_VIEW, DEFAULT_APPLY_TO_USER_PROFILE_VIEW);
   var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW);
   var currentPage = window.location.href;
-  
+
   if (applyToAllGiveawaysView && isCurrentPage(KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW)) {
     return true;
   }
- 
+
   if (applyToGroupGiveawaysView && isCurrentPage(KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW)) {
     return true;
   }
- 
+
   if (applyToWishlistGiveawaysView && isCurrentPage(KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW)) {
     return true;
   }
- 
+
   if (applyToUserProfileView && isCurrentPage(KEY_APPLY_TO_USER_PROFILE_VIEW)) {
     return true;
   }
- 
+
   if (applyToNewGiveawaysView && isCurrentPage(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW)) {
     return true;
   }
- 
+
   if (applyToSearchResultsView && isCurrentPage(KEY_APPLY_TO_SEARCH_RESULTS_VIEW)) {
     return true;
   }
@@ -265,22 +265,22 @@ function isFilteringEnabledOnCurrentPage() {
 function isCurrentPage(pageKey) {
   var currentPage = window.location.href;
   if (pageKey === KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0 || currentPage === "http://www.steamgifts.com" || currentPage === "http://www.steamgifts.com/");
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0 || currentPage === "http://www.steamgifts.com" || currentPage === "http://www.steamgifts.com/");
   }
   if (pageKey === KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
   }
   if (pageKey === KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
   }
-    if (pageKey === KEY_APPLY_TO_USER_PROFILE_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/user/") === 0);
+  if (pageKey === KEY_APPLY_TO_USER_PROFILE_VIEW) {
+    return (currentPage.indexOf("http://www.steamgifts.com/user/") === 0);
   }
-    if (pageKey === KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=new") === 0);
+  if (pageKey === KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW) {
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=new") === 0);
   }
-    if (pageKey === KEY_APPLY_TO_SEARCH_RESULTS_VIEW) {
-      return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?q") === 0);
+  if (pageKey === KEY_APPLY_TO_SEARCH_RESULTS_VIEW) {
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?q") === 0);
   }
   return false;
 }
@@ -294,13 +294,13 @@ function isCurrentPage(pageKey) {
   detailsContentDiv.appendChild(createFilterUiFilterOptionsRow());
   detailsContentDiv.appendChild(createFilterUiExcludeOptionsRow());
   detailsContentDiv.appendChild(createFilterUiEnabledPagesRow());
-  
+
   var detailsDiv = document.createElement("div");
   detailsDiv.id = FILTER_DETAILS_ID;
   detailsDiv.style.display = "none";
   detailsDiv.appendChild(detailsContentDiv);
   detailsDiv.appendChild(createFilterUiHideFilterDetailsRow());
-  
+
   // Create the filter UI element
   var controlsDiv = document.createElement("div");
   controlsDiv.setAttribute("id", FILTER_CONTROLS_ID);
@@ -310,17 +310,17 @@ function isCurrentPage(pageKey) {
   controlsDiv.style.marginBottom = "5px";
   controlsDiv.style.marginTop = "5px";
   controlsDiv.style.textShadow = "1px 1px rgba(255,255,255,0.90)";
-    
+
   controlsDiv.appendChild(createFilterUiCaptionRow());
   controlsDiv.appendChild(detailsDiv);
-  
+
   // Add the filter UI to the correct place on the current page
   insertFilterUi(controlsDiv);
   updateFilterCaptionTextColor();
-  
+
   // Append a CSS to the page itself so the caption changes its background color slightly when hovered over
-  var captionHoverCss = '#'+FILTER_CAPTION_ID+':hover{background-color:rgba(255,255,255,0.60);}';
-  captionHoverCss += '#'+FILTER_HIDE_ID+':hover{background-color:rgba(255,255,255,0.60);}';
+  var captionHoverCss = '#' + FILTER_CAPTION_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
+  captionHoverCss += '#' + FILTER_HIDE_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
   var style = document.createElement('style');
   if (style.styleSheet) {
     style.styleSheet.cssText = captionHoverCss;
@@ -328,7 +328,7 @@ function isCurrentPage(pageKey) {
     style.appendChild(document.createTextNode(captionHoverCss));
   }
   document.getElementsByTagName('head')[0].appendChild(style);
-  
+
 })();
 
 // Creates the top-level caption that is visible all the time on a giveaway page
@@ -361,8 +361,8 @@ function createFilterUiFilterOptionsRow() {
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
-  var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);  
-  
+  var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
+
   // The "minimal level to display" number input
   var minLevelToDisplayInput = document.createElement("input");
   minLevelToDisplayInput.setAttribute("type", "number");
@@ -376,7 +376,7 @@ function createFilterUiFilterOptionsRow() {
       minLevelToDisplayInput.value = minLevelToDisplay;
     } else if (minLevelToDisplay != minLevelToDisplayInputValue) {
       // If the value changed, save it and update the UI
-      GM_setValue(KEY_MIN_LEVEL_TO_DISPLAY, minLevelToDisplayInputValue);    
+      GM_setValue(KEY_MIN_LEVEL_TO_DISPLAY, minLevelToDisplayInputValue);
       minLevelToDisplay = minLevelToDisplayInputValue;
       updateFilterCaption();
       filterGiveaways();
@@ -386,7 +386,7 @@ function createFilterUiFilterOptionsRow() {
   minLevelToDisplayInput.onkeypress = function(event) {
     return isDigit(event.charCode);
   };
-    
+
   // The "maximal level to display" number input
   var maxLevelToDisplayInput = document.createElement("input");
   maxLevelToDisplayInput.setAttribute("type", "number");
@@ -410,17 +410,17 @@ function createFilterUiFilterOptionsRow() {
   maxLevelToDisplayInput.onkeypress = function(event) {
     return isDigit(event.charCode);
   };
-  
+
   // Create and add the level filter
   var showLevelSpan = document.createElement("span");
   showLevelSpan.appendChild(document.createTextNode("Show level:"));
   showLevelSpan.style.paddingRight = "5px";
-  
+
   var levelDashSpan = document.createElement("span");
   levelDashSpan.appendChild(document.createTextNode("-"));
   levelDashSpan.style.paddingRight = "5px";
   levelDashSpan.style.paddingLeft = "5px";
-  
+
   var flexGrowLeftDiv = document.createElement("div");
   flexGrowLeftDiv.style.display = "flex";
   flexGrowLeftDiv.style.alignItems = "center";
@@ -432,7 +432,7 @@ function createFilterUiFilterOptionsRow() {
   flexGrowLeftDiv.appendChild(minLevelToDisplayInput);
   flexGrowLeftDiv.appendChild(levelDashSpan);
   flexGrowLeftDiv.appendChild(maxLevelToDisplayInput);
-    
+
   // The "enable filtering by entry count" input checkbox
   var enableFilteringByEntryCountInput = document.createElement("input");
   enableFilteringByEntryCountInput.setAttribute("type", "checkbox");
@@ -455,7 +455,7 @@ function createFilterUiFilterOptionsRow() {
     updateFilterCaption();
     filterGiveaways();
   };
-      
+
   // The "maximal number of entries" number input
   var maxNumberOfEntriesInput = document.createElement("input");
   maxNumberOfEntriesInput.setAttribute("type", "number");
@@ -481,23 +481,23 @@ function createFilterUiFilterOptionsRow() {
   maxNumberOfEntriesInput.onkeypress = function(event) {
     return isDigit(event.charCode);
   };
-    
+
   var maxNumberOfEntriesInputOriginalTextColor = maxNumberOfEntriesInput.style.color;
   // Gray out the input text if disabled
   if (!enableFilteringByEntryCount) {
     maxNumberOfEntriesInput.style.color = "#888";
     maxNumberOfEntriesInput.style.backgroundColor = "#E8EAEF";
-  }    
-  
+  }
+
   // Create and add the entry count filter
   var entryFilteringEnabledSpan = document.createElement("span");
   entryFilteringEnabledSpan.appendChild(document.createTextNode("Entry count filtering"));
-    
+
   var entryFilteringCountSpan = document.createElement("span");
   entryFilteringCountSpan.appendChild(document.createTextNode("Max # of entries:"));
   entryFilteringCountSpan.style.paddingRight = "5px";
   entryFilteringCountSpan.style.paddingLeft = "10px";
-  
+
   var flexGrowRightDiv = document.createElement("div");
   flexGrowRightDiv.style.display = "flex";
   flexGrowRightDiv.style.alignItems = "center";
@@ -509,7 +509,7 @@ function createFilterUiFilterOptionsRow() {
   flexGrowRightDiv.appendChild(enableFilteringByEntryCountInput);
   flexGrowRightDiv.appendChild(entryFilteringCountSpan);
   flexGrowRightDiv.appendChild(maxNumberOfEntriesInput);
-  
+
   // Create the row itself
   var row = document.createElement("div");
   row.style.display = "flex";
@@ -527,23 +527,23 @@ function createFilterUiExcludeOptionsRow() {
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
-      
+
   // The "exlude group GAs" input checkbox
   var excludeGroupGiveawaysInput = document.createElement("input");
   excludeGroupGiveawaysInput.setAttribute("type", "checkbox");
   excludeGroupGiveawaysInput.style.width = "13px";
   excludeGroupGiveawaysInput.style.marginLeft = "9px";
   excludeGroupGiveawaysInput.checked = excludeGroupGiveaways;
-  excludeGroupGiveawaysInput.onclick = function(){
+  excludeGroupGiveawaysInput.onclick = function() {
     // Save the change and update the UI
     GM_setValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, excludeGroupGiveawaysInput.checked);
     updateFilterCaption();
     filterGiveaways();
   };
-    
+
   var excludeGroupGiveawaysSpan = document.createElement("span");
   excludeGroupGiveawaysSpan.appendChild(document.createTextNode("Exclude group giveaways"));
-    
+
   // Create and add the group GAs exclusion element
   var flexGrowLeftDiv = document.createElement("div");
   flexGrowLeftDiv.style.display = "flex";
@@ -554,7 +554,7 @@ function createFilterUiExcludeOptionsRow() {
   flexGrowLeftDiv.align = "left";
   flexGrowLeftDiv.appendChild(excludeGroupGiveawaysSpan);
   flexGrowLeftDiv.appendChild(excludeGroupGiveawaysInput);
-      
+
   // The "exlude whitelist GAs" input checkbox
   var excludeWhitelistGiveawaysInput = document.createElement("input");
   excludeWhitelistGiveawaysInput.setAttribute("type", "checkbox");
@@ -566,11 +566,11 @@ function createFilterUiExcludeOptionsRow() {
     GM_setValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, excludeWhitelistGiveawaysInput.checked);
     updateFilterCaption();
     filterGiveaways();
-  };  
-  
+  };
+
   var excludeWhitelistGiveawaysSpan = document.createElement("span");
   excludeWhitelistGiveawaysSpan.appendChild(document.createTextNode("Exclude whitelist giveaways"));
-    
+
   // Create and add the whitelist GAs exclusion element
   var flexGrowCenterDiv = document.createElement("div");
   flexGrowCenterDiv.style.display = "flex";
@@ -581,7 +581,7 @@ function createFilterUiExcludeOptionsRow() {
   flexGrowCenterDiv.align = "center";
   flexGrowCenterDiv.appendChild(excludeWhitelistGiveawaysSpan);
   flexGrowCenterDiv.appendChild(excludeWhitelistGiveawaysInput);
-    
+
   // The "exclude pinned giveaways" input checkbox
   var excludePinnedGiveawaysInput = document.createElement("input");
   excludePinnedGiveawaysInput.setAttribute("type", "checkbox");
@@ -595,11 +595,11 @@ function createFilterUiExcludeOptionsRow() {
     // Update the main UI
     updateFilterCaption();
     filterGiveaways();
-  };  
-  
+  };
+
   var excludePinnedGiveawaysSpan = document.createElement("span");
   excludePinnedGiveawaysSpan.appendChild(document.createTextNode('Exclude pinned giveaways'));
-  
+
   // Create and add the "exclude pinned giveaways" text
   var flexGrowRightDiv = document.createElement("div");
   flexGrowRightDiv.style.display = "flex";
@@ -610,7 +610,7 @@ function createFilterUiExcludeOptionsRow() {
   flexGrowRightDiv.align = "right";
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysSpan);
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysInput);
-  
+
   // Create the row itself
   var row = document.createElement("div");
   row.style.display = "flex";
@@ -631,8 +631,8 @@ function createFilterUiEnabledPagesRow() {
   var applyToWishlistGiveawaysView = GM_getValue(KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW);
   var applyToNewGiveawaysView = GM_getValue(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW);
   var applyToUserProfileView = GM_getValue(KEY_APPLY_TO_USER_PROFILE_VIEW, DEFAULT_APPLY_TO_USER_PROFILE_VIEW);
-  var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW); 
-    
+  var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW);
+
   // Create and add the "enable filtering on the main page" text
   var flexGrowLeftDiv = document.createElement("div");
   flexGrowLeftDiv.style.display = "flex";
@@ -647,7 +647,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheMainPageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowLeftDiv.appendChild(enableFilteringOnTheMainPageSpan);
-    
+
   // The "enable filtering on the main page" input checkbox
   var enableFilteringOnTheMainPageInput = document.createElement("input");
   enableFilteringOnTheMainPageInput.setAttribute("type", "checkbox");
@@ -678,7 +678,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheNewGiveawaysPageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowCenterDiv.appendChild(enableFilteringOnTheNewGiveawaysPageSpan);
-    
+
   // The "enable filtering on the new giveaways page" input checkbox
   var enableFilteringOnTheNewGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheNewGiveawaysPageInput.setAttribute("type", "checkbox");
@@ -709,7 +709,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheSearchResultsPageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowRightDiv.appendChild(enableFilteringOnTheSearchResultsPageSpan);
-    
+
   // The "enable filtering on the search results" input checkbox
   var enableFilteringOnTheSearchResultsPageInput = document.createElement("input");
   enableFilteringOnTheSearchResultsPageInput.setAttribute("type", "checkbox");
@@ -725,7 +725,7 @@ function createFilterUiEnabledPagesRow() {
     filterGiveaways();
   };
   flexGrowRightDiv.appendChild(enableFilteringOnTheSearchResultsPageInput);
-    
+
   // Create the first row in the filter details
   var firstRow = document.createElement("div");
   firstRow.style.display = "flex";
@@ -734,9 +734,9 @@ function createFilterUiEnabledPagesRow() {
   firstRow.style.paddingBottom = "5px";
   firstRow.style.borderTop = "1px solid #d2d6e0";
   firstRow.appendChild(flexGrowLeftDiv);
-  firstRow.appendChild(flexGrowCenterDiv);  
-  firstRow.appendChild(flexGrowRightDiv);  
-    
+  firstRow.appendChild(flexGrowCenterDiv);
+  firstRow.appendChild(flexGrowRightDiv);
+
   // Create and add the "enable filtering on the wishlist giveaways page" text
   flexGrowLeftDiv = document.createElement("div");
   flexGrowLeftDiv.style.display = "flex";
@@ -751,7 +751,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheWishlistGiveawaysPageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowLeftDiv.appendChild(enableFilteringOnTheWishlistGiveawaysPageSpan);
-    
+
   // The "enable filtering on the wishlist giveaways page" input checkbox
   var enableFilteringOnTheWishlistGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheWishlistGiveawaysPageInput.setAttribute("type", "checkbox");
@@ -767,7 +767,7 @@ function createFilterUiEnabledPagesRow() {
     filterGiveaways();
   };
   flexGrowLeftDiv.appendChild(enableFilteringOnTheWishlistGiveawaysPageInput);
-    
+
   // Create and add the "enable filtering on the "group giveaways" page" text
   flexGrowCenterDiv = document.createElement("div");
   flexGrowCenterDiv.style.display = "flex";
@@ -782,7 +782,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheGroupGiveawaysPageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowCenterDiv.appendChild(enableFilteringOnTheGroupGiveawaysPageSpan);
-    
+
   // The "enable filtering on the "group giveaways" page" page" input checkbox
   var enableFilteringOnTheGroupGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheGroupGiveawaysPageInput.setAttribute("type", "checkbox");
@@ -798,7 +798,7 @@ function createFilterUiEnabledPagesRow() {
     filterGiveaways();
   };
   flexGrowCenterDiv.appendChild(enableFilteringOnTheGroupGiveawaysPageInput);
-    
+
   // Create and add the "enable filtering on the user profile page" text
   flexGrowRightDiv = document.createElement("div");
   flexGrowRightDiv.style.display = "flex";
@@ -813,7 +813,7 @@ function createFilterUiEnabledPagesRow() {
     enableFilteringOnTheUserProfilePageSpan.appendChild(document.createTextNode(" (this page)"));
   }
   flexGrowRightDiv.appendChild(enableFilteringOnTheUserProfilePageSpan);
-    
+
   // The "enable filtering on the user profile page" input checkbox
   var enableFilteringOnTheUserProfilePageInput = document.createElement("input");
   enableFilteringOnTheUserProfilePageInput.setAttribute("type", "checkbox");
@@ -829,7 +829,7 @@ function createFilterUiEnabledPagesRow() {
     filterGiveaways();
   };
   flexGrowRightDiv.appendChild(enableFilteringOnTheUserProfilePageInput);
-  
+
   // Create the second row in the filter details
   var secondRow = document.createElement("div");
   secondRow.style.display = "flex";
@@ -839,7 +839,7 @@ function createFilterUiEnabledPagesRow() {
   secondRow.appendChild(flexGrowLeftDiv);
   secondRow.appendChild(flexGrowCenterDiv);
   secondRow.appendChild(flexGrowRightDiv);
-    
+
   // Create the row itself
   var row = document.createElement("div");
   row.appendChild(firstRow);
@@ -857,7 +857,7 @@ function createFilterUiHideFilterDetailsRow() {
   hideControlsDiv.style.borderTop = "1px solid #d2d6e0";
   hideControlsDiv.style.cursor = "pointer";
   hideControlsDiv.appendChild(document.createTextNode("Hide filter options"));
-  hideControlsDiv.onclick = function(){
+  hideControlsDiv.onclick = function() {
     // Hide the filter details
     var filterDetails = document.getElementById(FILTER_DETAILS_ID);
     if (filterDetails !== null) {
@@ -875,7 +875,7 @@ function insertFilterUi(filterUi) {
     parent.insertBefore(filterUi, parent.childNodes[2]);
     return;
   }
-    
+
   // Insert into profile
   elements = document.getElementsByClassName("page__heading");
   // Since "page__heading" is on multiple pages, a check needs to be done that user is on the profile page
@@ -906,23 +906,23 @@ function updateFilterCaptionTextColor() {
 // Creates the text for the filter caption
 function getFilterCaption() {
   var filterCaption = "Giveaway Filter";
-  
+
   if (!isFilteringEnabledOnCurrentPage()) {
     return filterCaption;
   }
-  
+
   // Add the level range to the caption
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
   filterCaption += " (Level " + minLevelToDisplay + "-" + maxLevelToDisplay;
-    
+
   // Add the maximal amount of entries to the caption
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   if (enableFilteringByEntryCount) {
     var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, 200);
     filterCaption += ", Max " + maxNumberOfEntries + " entries";
   }
-  
+
   // Add the excluded information to the caption
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
@@ -947,7 +947,7 @@ function getFilterCaption() {
     excluded = ", " + excluded + " GAs excluded";
   }
   filterCaption += excluded;
-    
+
   // Close it up and return
   filterCaption += ")";
   return filterCaption;
@@ -959,28 +959,30 @@ function isDigit(charCode) {
 }
 
 // Function handling execution after DOM has been changed - makes the filtering work in endless scrolling of SG++
-var observeDOM = (function(){
-    var MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
-        eventListenerSupported = window.addEventListener;
- 
-    return function(obj, callback){
-        if( MutationObserver ){
-            // Define a new observer
-            var obs = new MutationObserver(function(mutations, observer){
-                if( mutations[0].addedNodes.length || mutations[0].removedNodes.length )
-                    callback();
-            });
-            // Have the observer observe the registered element for changes in its children
-            obs.observe( obj, { childList:true, subtree:true });
-        }
-        else if( eventListenerSupported ){
-            obj.addEventListener('DOMNodeInserted', callback, false);
-            obj.addEventListener('DOMNodeRemoved', callback, false);
-        }
-    };
+var observeDOM = (function() {
+  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver,
+      eventListenerSupported = window.addEventListener;
+
+  return function(obj, callback) {
+    if (MutationObserver) {
+      // Define a new observer
+      var obs = new MutationObserver(function(mutations, observer) {
+        if (mutations[0].addedNodes.length || mutations[0].removedNodes.length)
+          callback();
+      });
+      // Have the observer observe the registered element for changes in its children
+      obs.observe(obj, {
+        childList : true,
+        subtree : true
+      });
+    } else if (eventListenerSupported) {
+      obj.addEventListener('DOMNodeInserted', callback, false);
+      obj.addEventListener('DOMNodeRemoved', callback, false);
+    }
+  };
 })();
 
 // Register the filtering upon any changes on the whole page
-observeDOM(document, function(){
-    filterGiveaways();
+observeDOM(document, function() {
+  filterGiveaways();
 });
