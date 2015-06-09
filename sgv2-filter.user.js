@@ -328,6 +328,7 @@ function isCurrentPage(pageKey) {
   detailsContentDiv.appendChild(createFilterUiFilterOptionsRow());
   detailsContentDiv.appendChild(createFilterUiExcludeOptionsRow());
   detailsContentDiv.appendChild(createFilterUiEnabledPagesRow());
+  detailsContentDiv.appendChild(createFilterUiOtherOptionsRow());
 
   var detailsDiv = document.createElement("div");
   detailsDiv.id = FILTER_DETAILS_ID;
@@ -878,6 +879,47 @@ function createFilterUiEnabledPagesRow() {
   var row = document.createElement("div");
   row.appendChild(firstRow);
   row.appendChild(secondRow);
+  return row;
+}
+
+// Creates a row with other options
+function createFilterUiOtherOptionsRow() {
+  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
+
+  // The "remove pagination" input checkbox
+  var removePaginationInput = document.createElement("input");
+  removePaginationInput.setAttribute("type", "checkbox");
+  removePaginationInput.style.width = "13px";
+  removePaginationInput.style.marginLeft = "9px";
+  removePaginationInput.checked = removePagination;
+  removePaginationInput.onclick = function() {
+    // Save the change and update the UI
+    GM_setValue(KEY_REMOVE_PAGINATION, removePaginationInput.checked);
+    filterGiveaways();
+  };
+
+  var removePaginationSpan = document.createElement("span");
+  removePaginationSpan.appendChild(document.createTextNode("Remove pagination"));
+
+  // Create and add the group GAs exclusion element
+  var flexGrowLeftDiv = document.createElement("div");
+  flexGrowLeftDiv.style.display = "flex";
+  flexGrowLeftDiv.style.alignItems = "center";
+  flexGrowLeftDiv.style.justifyContent = "flex-start";
+  flexGrowLeftDiv.style.flexGrow = "1";
+  flexGrowLeftDiv.style.flexBasis = "0";
+  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.appendChild(removePaginationSpan);
+  flexGrowLeftDiv.appendChild(removePaginationInput);
+
+  // Create the row itself
+  var row = document.createElement("div");
+  row.style.display = "flex";
+  row.style.alignItems = "center";
+  row.style.paddingTop = "5px";
+  row.style.paddingBottom = "5px";
+  row.style.borderTop = "1px solid #d2d6e0";
+  row.appendChild(flexGrowLeftDiv);
   return row;
 }
 
