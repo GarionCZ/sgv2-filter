@@ -233,9 +233,9 @@ function handlePinnedBlock() {
 function handlePagination() {
   var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
 
-  // Handle the pagination itself
+  // Handle the pagination itself, leave the last pagination element in place (the magical -2 in the loop condition)
   var paginationDivs = document.getElementsByClassName("table__heading");
-  for ( i = 0; i < paginationDivs.length; i++) {
+  for ( i = 0; i < paginationDivs.length - 2; i++) {
     if (removePagination) {
       paginationDivs[i].style.display = "none";
     } else {
