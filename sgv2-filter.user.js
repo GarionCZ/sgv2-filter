@@ -198,11 +198,11 @@ function getContributorLevel(giveaway) {
 // Returns the points of a giveaway
 function getPoints(giveaway) {
   var pointsEle = giveaway.getElementsByClassName("giveaway__heading__thin");
-  // Since there is only one point element in a giveaways, just take the first item if available
+  // Since the points are the last element in a giveaway, just take the last item if available
   if (pointsEle.length === 0) {
     return 0;
   }
-  var pointsTxt = pointsEle[0].innerHTML;
+  var pointsTxt = pointsEle[pointsEle.length-1].innerHTML;
 
   var substringStart = 0;
   // Remove the "(" at the start of the string, if present (SG++ grid view doesn't have it)
@@ -664,6 +664,7 @@ function createFilterUiFilterOptionsRow() {
   row.style.paddingBottom = "5px";
   row.style.borderTop = "1px solid #d2d6e0";
   row.appendChild(flexGrowLeftDiv);
+  row.appendChild(flexGrowCenterDiv);
   row.appendChild(flexGrowRightDiv);
   return row;
 }
