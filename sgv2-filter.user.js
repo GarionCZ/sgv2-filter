@@ -542,8 +542,10 @@ function createFilterUiFilterOptionsRow() {
   maxPointsToDisplayInput.onchange = function() {
     // Filter out invalid values
     var maxPointsToDisplayInputValue = parseInt(maxPointsToDisplayInput.value);
-    if (maxPointsToDisplayInputValue < 0 || maxPointsToDisplayInputValue > 150 || maxPointsToDisplayInputValue < minPointsToDisplay) {
+    if (maxPointsToDisplayInputValue < 0 || maxPointsToDisplayInputValue < minPointsToDisplay) {
       maxPointsToDisplayInput.value = maxPointsToDisplay;
+    } else if (maxPointsToDisplayInputValue > 150) {
+      maxPointsToDisplayInput.value = DEFAULT_MAX_POINTS_TO_DISPLAY;
     } else if (maxPointsToDisplay != maxPointsToDisplayInputValue) {
       // If the value changed, save it and update the UI
       GM_setValue(KEY_MAX_POINTS_TO_DISPLAY, maxPointsToDisplayInputValue);
