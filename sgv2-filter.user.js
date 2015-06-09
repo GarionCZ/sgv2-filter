@@ -4,8 +4,8 @@
 // @description Giveaway filter for SteamGifts v2
 // @author      Garion
 // @include     http://www.steamgifts.com/*
-// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
-// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
+// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
+// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
 // @version     0.2.2-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
@@ -470,8 +470,6 @@ function createFilterUiFilterOptionsRow() {
   flexGrowLeftDiv.appendChild(levelDashSpan);
   flexGrowLeftDiv.appendChild(maxLevelToDisplayInput);
     
-// TIMMAEH >
-    
   // The "minimal points to display" number input
   var minPointsToDisplayInput = document.createElement("input");
   minPointsToDisplayInput.setAttribute("type", "number");
@@ -541,8 +539,6 @@ function createFilterUiFilterOptionsRow() {
   flexGrowCenterDiv.appendChild(minPointsToDisplayInput);
   flexGrowCenterDiv.appendChild(pointsDashSpan);
   flexGrowCenterDiv.appendChild(maxPointsToDisplayInput);
-
-// TIMMAEH <
     
   // The "enable filtering by entry count" input checkbox
   var enableFilteringByEntryCountInput = document.createElement("input");
