@@ -25,6 +25,7 @@ var KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = "applyToWishlistGiveawaysView";
 var KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW = "applyToNewGiveawaysView";
 var KEY_APPLY_TO_USER_PROFILE_VIEW = "applyToUserProfileView";
 var KEY_APPLY_TO_SEARCH_RESULTS_VIEW = "applyToSearchResultsView";
+var KEY_REMOVE_PAGINATION = "removePagination";
 
 // Default values of persistent settings
 var DEFAULT_EXCLUDE_GROUP_GIVEAWAYS = true;
@@ -40,6 +41,7 @@ var DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
+var DEFAULT_KEY_REMOVE_PAGINATION = true;
 
 // IDs of filter UI elements
 var FILTER_CONTROLS_ID = "filterControls";
@@ -122,6 +124,8 @@ function filterGiveaways() {
 
   // Handle the pinned giveaways block
   handlePinnedBlock();
+
+  handlePagination();
 
   // Dirty hack to "fix" endless scrolling in SG++ when a lot of GAs on the same page got removed
   window.scrollBy(0, 1);
@@ -221,6 +225,35 @@ function handlePinnedBlock() {
     pinnedBlock.style.display = "";
   } else {
     pinnedBlock.style.display = "none";
+  }
+
+}
+
+// Handles the pagination. Moves the GAs in SG++ grid layout into one grid if pagination should be removed
+function handlePagination() {
+  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
+
+  // Handle the pagination itself
+  var paginationDivs = document.getElementsByClassName("table__heading");
+  for ( i = 0; i < paginationDivs.length; i++) {
+    if (removePagination) {
+      paginationDivs[i].style.display = "none";
+    } else {
+      paginationDivs[i].style.display = "";
+    }
+  }
+
+  var sgppGridviews = document.getElementsByClassName("SGPP__gridView");
+  if (sgppGridviews.length > 0) {
+    var sgppFirstGridview = sgppGridviews[0];
+    for (i = 1; i < sgppGridviews.length; i++) {
+      var currentGridview = sgppGridviews[i];
+      var sgppGiveawayDivs = currentGridview.getElementsByClassName("SGPP__gridTile");
+      for (j = 0; j < sgppGiveawayDivs.length; j++) {
+        currentGridview.removeChild(sgppGiveawayDivs[j]);
+        sgppFirstGridview.appendChild(sgppGiveawayDivs[j]);
+      }
+    }
   }
 
 }
