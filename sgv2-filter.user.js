@@ -19,6 +19,8 @@ var KEY_ENABLE_FILTERING_BY_ENTRY_COUNT = "enableFilteringByEntryCount";
 var KEY_MAX_NUMBER_OF_ENTRIES = "maxNumberOfEntries";
 var KEY_MIN_LEVEL_TO_DISPLAY = "minLevelToDisplay";
 var KEY_MAX_LEVEL_TO_DISPLAY = "maxLevelToDisplay";
+var KEY_MIN_POINTS_TO_DISPLAY = "minPointsToDisplay";
+var KEY_MAX_POINTS_TO_DISPLAY = "maxPointsToDisplay";
 var KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW = "applyToAllGiveawaysView";
 var KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW = "applyToGroupGiveawaysView";
 var KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = "applyToWishlistGiveawaysView";
@@ -35,6 +37,8 @@ var DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT = true;
 var DEFAULT_MAX_NUMBER_OF_ENTRIES = 200;
 var DEFAULT_MIN_LEVEL_TO_DISPLAY = 0;
 var DEFAULT_MAX_LEVEL_TO_DISPLAY = 10;
+var DEFAULT_MIN_POINTS_TO_DISPLAY = 0;
+var DEFAULT_MAX_POINTS_TO_DISPLAY = 150;
 var DEFAULT_APPLY_TO_ALL_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_GROUP_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = false;
@@ -67,6 +71,8 @@ function filterGiveaways() {
 
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
+  var minPointsToDisplay = GM_getValue(KEY_MIN_POINTS_TO_DISPLAY, DEFAULT_MIN_POINTS_TO_DISPLAY);
+  var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
@@ -103,6 +109,13 @@ function filterGiveaways() {
     // Evaluate the contributor level
     var contributorLevel = getContributorLevel(giveaways[i]);
     if (contributorLevel < minLevelToDisplay || contributorLevel > maxLevelToDisplay) {
+      giveawaysToRemove.push(giveaways[i]);
+      continue;
+    }
+
+    // Evaluate the points
+    var points = getPoints(giveaways[i]);
+    if (points < minPointsToDisplay || points > maxPointsToDisplay) {
       giveawaysToRemove.push(giveaways[i]);
       continue;
     }
@@ -178,6 +191,29 @@ function getContributorLevel(giveaway) {
   var level = contributorLevel.substring(substringStart, contributorLevel.length - 1);
 
   return level;
+}
+
+
+
+// Returns the points of a giveaway
+function getPoints(giveaway) {
+  var pointsEle = giveaway.getElementsByClassName("giveaway__heading__thin");
+  // Since there is only one point element in a giveaways, just take the first item if available
+  if (pointsEle.length === 0) {
+    return 0;
+  }
+  var pointsTxt = pointsEle[0].innerHTML;
+
+  var substringStart = 0;
+  // Remove the "(" at the start of the string, if present (SG++ grid view doesn't have it)
+  if (pointsTxt.indexOf("(") === 0) {
+    substringStart = 1;
+  }
+
+  // Parse the points, remove the "P)" from the end
+  var points = pointsTxt.substring(substringStart, pointsTxt.length - 2);
+
+  return points;
 }
 
 // Parses the number of entries for a giveaway
@@ -398,6 +434,8 @@ function createFilterUiCaptionRow() {
 function createFilterUiFilterOptionsRow() {
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
+  var minPointsToDisplay = GM_getValue(KEY_MIN_POINTS_TO_DISPLAY, DEFAULT_MIN_POINTS_TO_DISPLAY);
+  var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
 
@@ -470,6 +508,76 @@ function createFilterUiFilterOptionsRow() {
   flexGrowLeftDiv.appendChild(minLevelToDisplayInput);
   flexGrowLeftDiv.appendChild(levelDashSpan);
   flexGrowLeftDiv.appendChild(maxLevelToDisplayInput);
+    
+  // The "minimal points to display" number input
+  var minPointsToDisplayInput = document.createElement("input");
+  minPointsToDisplayInput.setAttribute("type", "number");
+  minPointsToDisplayInput.setAttribute("maxLength", "3");
+  minPointsToDisplayInput.style.width = "62px";
+  minPointsToDisplayInput.value = minPointsToDisplay;
+  minPointsToDisplayInput.onchange = function() {
+    // Filter out invalid values
+    var minPointsToDisplayInputValue = parseInt(minPointsToDisplayInput.value);
+    if (minPointsToDisplayInputValue < 0 || minPointsToDisplayInputValue > 150 || minPointsToDisplayInputValue > maxPointsToDisplay) {
+      minPointsToDisplayInput.value = minPointsToDisplay;
+    } else if (minPointsToDisplay != minPointsToDisplayInputValue) {
+      // If the value changed, save it and update the UI
+      GM_setValue(KEY_MIN_POINTS_TO_DISPLAY, minPointsToDisplayInputValue);
+      minPointsToDisplay = minPointsToDisplayInputValue;
+      updateFilterCaption();
+      filterGiveaways();
+    }
+  };
+  // Accept only digits
+  minPointsToDisplayInput.onkeypress = function(event) {
+    return isDigit(event.charCode);
+  };
+
+  // The "maximal level to display" number input
+  var maxPointsToDisplayInput = document.createElement("input");
+  maxPointsToDisplayInput.setAttribute("type", "number");
+  maxPointsToDisplayInput.setAttribute("maxLength", "3");
+  maxPointsToDisplayInput.style.width = "62px";
+  maxPointsToDisplayInput.value = maxPointsToDisplay;
+  maxPointsToDisplayInput.onchange = function() {
+    // Filter out invalid values
+    var maxPointsToDisplayInputValue = parseInt(maxPointsToDisplayInput.value);
+    if (maxPointsToDisplayInputValue < 0 || maxPointsToDisplayInputValue > 150 || maxPointsToDisplayInputValue < minPointsToDisplay) {
+      maxPointsToDisplayInput.value = maxPointsToDisplay;
+    } else if (maxPointsToDisplay != maxPointsToDisplayInputValue) {
+      // If the value changed, save it and update the UI
+      GM_setValue(KEY_MAX_POINTS_TO_DISPLAY, maxPointsToDisplayInputValue);
+      maxPointsToDisplay = maxPointsToDisplayInputValue;
+      updateFilterCaption();
+      filterGiveaways();
+    }
+  };
+  // Accept only digits
+  maxPointsToDisplayInput.onkeypress = function(event) {
+    return isDigit(event.charCode);
+  };
+    
+  // Create and add the points filter
+  var showPointsSpan = document.createElement("span");
+  showPointsSpan.appendChild(document.createTextNode("Show points:"));
+  showPointsSpan.style.paddingRight = "5px";
+
+  var pointsDashSpan = document.createElement("span");
+  pointsDashSpan.appendChild(document.createTextNode("-"));
+  pointsDashSpan.style.paddingRight = "5px";
+  pointsDashSpan.style.paddingLeft = "5px";
+
+  var flexGrowCenterDiv = document.createElement("div");
+  flexGrowCenterDiv.style.display = "flex";
+  flexGrowCenterDiv.style.alignItems = "center";
+  flexGrowCenterDiv.style.justifyContent = "flex-start";
+  flexGrowCenterDiv.style.flexGrow = "1";
+  flexGrowCenterDiv.style.flexBasis = "0";
+  flexGrowCenterDiv.align = "center"; 
+  flexGrowCenterDiv.appendChild(showPointsSpan);
+  flexGrowCenterDiv.appendChild(minPointsToDisplayInput);
+  flexGrowCenterDiv.appendChild(pointsDashSpan);
+  flexGrowCenterDiv.appendChild(maxPointsToDisplayInput);
 
   // The "enable filtering by entry count" input checkbox
   var enableFilteringByEntryCountInput = document.createElement("input");
