@@ -243,15 +243,18 @@ function handlePagination() {
     }
   }
 
+  // Move the GAs in SG++ grid layout to the first grid
   var sgppGridviews = document.getElementsByClassName("SGPP__gridView");
   if (sgppGridviews.length > 0) {
-    var sgppFirstGridview = sgppGridviews[0];
-    for (i = 1; i < sgppGridviews.length; i++) {
-      var currentGridview = sgppGridviews[i];
-      var sgppGiveawayDivs = currentGridview.getElementsByClassName("SGPP__gridTile");
-      for (j = 0; j < sgppGiveawayDivs.length; j++) {
-        currentGridview.removeChild(sgppGiveawayDivs[j]);
-        sgppFirstGridview.appendChild(sgppGiveawayDivs[j]);
+    if (removePagination) {
+      var sgppFirstGridview = sgppGridviews[0];
+      for (i = 1; i < sgppGridviews.length; i++) {
+        var currentGridview = sgppGridviews[i];
+        var sgppGiveawayDivs = currentGridview.getElementsByClassName("SGPP__gridTile");
+        for (j = 0; j < sgppGiveawayDivs.length; j++) {
+          currentGridview.removeChild(sgppGiveawayDivs[j]);
+          sgppFirstGridview.appendChild(sgppGiveawayDivs[j]);
+        }
       }
     }
   }
