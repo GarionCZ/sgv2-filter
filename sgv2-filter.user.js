@@ -4,9 +4,9 @@
 // @description Giveaway filter for SteamGifts v2
 // @author      Garion
 // @include     http://www.steamgifts.com/*
-// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
-// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
-// @version     0.2.1-DEV
+// @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
+// @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
+// @version     0.2.2-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -19,13 +19,14 @@ var KEY_ENABLE_FILTERING_BY_ENTRY_COUNT = "enableFilteringByEntryCount";
 var KEY_MAX_NUMBER_OF_ENTRIES = "maxNumberOfEntries";
 var KEY_MIN_LEVEL_TO_DISPLAY = "minLevelToDisplay";
 var KEY_MAX_LEVEL_TO_DISPLAY = "maxLevelToDisplay";
+var KEY_MIN_POINTS_TO_DISPLAY = "minPointsToDisplay";
+var KEY_MAX_POINTS_TO_DISPLAY = "maxPointsToDisplay";
 var KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW = "applyToAllGiveawaysView";
 var KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW = "applyToGroupGiveawaysView";
 var KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = "applyToWishlistGiveawaysView";
 var KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW = "applyToNewGiveawaysView";
 var KEY_APPLY_TO_USER_PROFILE_VIEW = "applyToUserProfileView";
 var KEY_APPLY_TO_SEARCH_RESULTS_VIEW = "applyToSearchResultsView";
-var KEY_REMOVE_PAGINATION = "removePagination";
 
 // Default values of persistent settings
 var DEFAULT_EXCLUDE_GROUP_GIVEAWAYS = true;
@@ -35,13 +36,14 @@ var DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT = true;
 var DEFAULT_MAX_NUMBER_OF_ENTRIES = 200;
 var DEFAULT_MIN_LEVEL_TO_DISPLAY = 0;
 var DEFAULT_MAX_LEVEL_TO_DISPLAY = 10;
+var DEFAULT_MIN_POINTS_TO_DISPLAY = 0;
+var DEFAULT_MAX_POINTS_TO_DISPLAY = 150;
 var DEFAULT_APPLY_TO_ALL_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_GROUP_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
-var DEFAULT_KEY_REMOVE_PAGINATION = true;
 
 // IDs of filter UI elements
 var FILTER_CONTROLS_ID = "filterControls";
@@ -67,6 +69,8 @@ function filterGiveaways() {
 
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
+  var minPointsToDisplay = GM_getValue(KEY_MIN_POINTS_TO_DISPLAY, DEFAULT_MIN_POINTS_TO_DISPLAY);
+  var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
@@ -107,6 +111,13 @@ function filterGiveaways() {
       continue;
     }
 
+    // Evaluate the points
+    var points = getPoints(giveaways[i]);
+    if (points < minPointsToDisplay || points > maxPointsToDisplay) {
+      giveawaysToRemove.push(giveaways[i]);
+      continue;
+    }
+
     // Handle entry-count filtering
     if (enableFilteringByEntryCount) {
       var numberOfEntries = getNumberOfEntries(giveaways[i]);
@@ -124,8 +135,6 @@ function filterGiveaways() {
 
   // Handle the pinned giveaways block
   handlePinnedBlock();
-
-  handlePagination();
 
   // Dirty hack to "fix" endless scrolling in SG++ when a lot of GAs on the same page got removed
   window.scrollBy(0, 1);
@@ -180,6 +189,27 @@ function getContributorLevel(giveaway) {
   return level;
 }
 
+// Returns the points of a giveaway
+function getPoints(giveaway) {
+  var pointsEle = giveaway.getElementsByClassName("giveaway__heading__thin");
+  // Since the points are the last element in a giveaway, just take the last item if available
+  if (pointsEle.length === 0) {
+    return 0;
+  }
+  var pointsTxt = pointsEle[pointsEle.length-1].innerHTML;
+
+  var substringStart = 0;
+  // Remove the "(" at the start of the string, if present (SG++ grid view doesn't have it)
+  if (pointsTxt.indexOf("(") === 0) {
+    substringStart = 1;
+  }
+
+  // Parse the points, remove the "P)" from the end
+  var points = pointsTxt.substring(substringStart, pointsTxt.length - 2);
+    
+  return points;
+}
+
 // Parses the number of entries for a giveaway
 function getNumberOfEntries(giveaway) {
   // Parse from SGv2 layout
@@ -225,38 +255,6 @@ function handlePinnedBlock() {
     pinnedBlock.style.display = "";
   } else {
     pinnedBlock.style.display = "none";
-  }
-
-}
-
-// Handles the pagination. Moves the GAs in SG++ grid layout into one grid if pagination should be removed
-function handlePagination() {
-  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
-
-  // Handle the pagination itself, leave the last pagination element in place (the magical -2 in the loop condition)
-  var paginationDivs = document.getElementsByClassName("table__heading");
-  for ( i = 0; i < paginationDivs.length - 2; i++) {
-    if (removePagination) {
-      paginationDivs[i].style.display = "none";
-    } else {
-      paginationDivs[i].style.display = "";
-    }
-  }
-
-  // Move the GAs in SG++ grid layout to the first grid
-  var sgppGridviews = document.getElementsByClassName("SGPP__gridView");
-  if (sgppGridviews.length > 0) {
-    if (removePagination) {
-      var sgppFirstGridview = sgppGridviews[0];
-      for (i = 1; i < sgppGridviews.length; i++) {
-        var currentGridview = sgppGridviews[i];
-        var sgppGiveawayDivs = currentGridview.getElementsByClassName("SGPP__gridTile");
-        for (j = 0; j < sgppGiveawayDivs.length; j++) {
-          currentGridview.removeChild(sgppGiveawayDivs[j]);
-          sgppFirstGridview.appendChild(sgppGiveawayDivs[j]);
-        }
-      }
-    }
   }
 
 }
@@ -331,7 +329,6 @@ function isCurrentPage(pageKey) {
   detailsContentDiv.appendChild(createFilterUiFilterOptionsRow());
   detailsContentDiv.appendChild(createFilterUiExcludeOptionsRow());
   detailsContentDiv.appendChild(createFilterUiEnabledPagesRow());
-  detailsContentDiv.appendChild(createFilterUiOtherOptionsRow());
 
   var detailsDiv = document.createElement("div");
   detailsDiv.id = FILTER_DETAILS_ID;
@@ -398,6 +395,8 @@ function createFilterUiCaptionRow() {
 function createFilterUiFilterOptionsRow() {
   var minLevelToDisplay = GM_getValue(KEY_MIN_LEVEL_TO_DISPLAY, DEFAULT_MIN_LEVEL_TO_DISPLAY);
   var maxLevelToDisplay = GM_getValue(KEY_MAX_LEVEL_TO_DISPLAY, DEFAULT_MAX_LEVEL_TO_DISPLAY);
+  var minPointsToDisplay = GM_getValue(KEY_MIN_POINTS_TO_DISPLAY, DEFAULT_MIN_POINTS_TO_DISPLAY);
+  var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
 
@@ -470,7 +469,81 @@ function createFilterUiFilterOptionsRow() {
   flexGrowLeftDiv.appendChild(minLevelToDisplayInput);
   flexGrowLeftDiv.appendChild(levelDashSpan);
   flexGrowLeftDiv.appendChild(maxLevelToDisplayInput);
+    
+// TIMMAEH >
+    
+  // The "minimal points to display" number input
+  var minPointsToDisplayInput = document.createElement("input");
+  minPointsToDisplayInput.setAttribute("type", "number");
+  minPointsToDisplayInput.setAttribute("maxLength", "3");
+  minPointsToDisplayInput.style.width = "62px";
+  minPointsToDisplayInput.value = minPointsToDisplay;
+  minPointsToDisplayInput.onchange = function() {
+    // Filter out invalid values
+    var minPointsToDisplayInputValue = parseInt(minPointsToDisplayInput.value);
+    if (minPointsToDisplayInputValue < 0 || minPointsToDisplayInputValue > 150 || minPointsToDisplayInputValue > maxPointsToDisplay) {
+      minPointsToDisplayInput.value = minPointsToDisplay;
+    } else if (minPointsToDisplay != minPointsToDisplayInputValue) {
+      // If the value changed, save it and update the UI
+      GM_setValue(KEY_MIN_POINTS_TO_DISPLAY, minPointsToDisplayInputValue);
+      minPointsToDisplay = minPointsToDisplayInputValue;
+      updateFilterCaption();
+      filterGiveaways();
+    }
+  };
+  // Accept only digits
+  minPointsToDisplayInput.onkeypress = function(event) {
+    return isDigit(event.charCode);
+  };
 
+  // The "maximal level to display" number input
+  var maxPointsToDisplayInput = document.createElement("input");
+  maxPointsToDisplayInput.setAttribute("type", "number");
+  maxPointsToDisplayInput.setAttribute("maxLength", "3");
+  maxPointsToDisplayInput.style.width = "62px";
+  maxPointsToDisplayInput.value = maxPointsToDisplay;
+  maxPointsToDisplayInput.onchange = function() {
+    // Filter out invalid values
+    var maxPointsToDisplayInputValue = parseInt(maxPointsToDisplayInput.value);
+    if (maxPointsToDisplayInputValue < 0 || maxPointsToDisplayInputValue > 150 || maxPointsToDisplayInputValue < minPointsToDisplay) {
+      maxPointsToDisplayInput.value = maxPointsToDisplay;
+    } else if (maxPointsToDisplay != maxPointsToDisplayInputValue) {
+      // If the value changed, save it and update the UI
+      GM_setValue(KEY_MAX_POINTS_TO_DISPLAY, maxPointsToDisplayInputValue);
+      maxPointsToDisplay = maxPointsToDisplayInputValue;
+      updateFilterCaption();
+      filterGiveaways();
+    }
+  };
+  // Accept only digits
+  maxPointsToDisplayInput.onkeypress = function(event) {
+    return isDigit(event.charCode);
+  };
+    
+  // Create and add the points filter
+  var showPointsSpan = document.createElement("span");
+  showPointsSpan.appendChild(document.createTextNode("Show points:"));
+  showPointsSpan.style.paddingRight = "5px";
+
+  var pointsDashSpan = document.createElement("span");
+  pointsDashSpan.appendChild(document.createTextNode("-"));
+  pointsDashSpan.style.paddingRight = "5px";
+  pointsDashSpan.style.paddingLeft = "5px";
+
+  var flexGrowCenterDiv = document.createElement("div");
+  flexGrowCenterDiv.style.display = "flex";
+  flexGrowCenterDiv.style.alignItems = "center";
+  flexGrowCenterDiv.style.justifyContent = "flex-start";
+  flexGrowCenterDiv.style.flexGrow = "1";
+  flexGrowCenterDiv.style.flexBasis = "0";
+  flexGrowCenterDiv.align = "center"; 
+  flexGrowCenterDiv.appendChild(showPointsSpan);
+  flexGrowCenterDiv.appendChild(minPointsToDisplayInput);
+  flexGrowCenterDiv.appendChild(pointsDashSpan);
+  flexGrowCenterDiv.appendChild(maxPointsToDisplayInput);
+
+// TIMMAEH <
+    
   // The "enable filtering by entry count" input checkbox
   var enableFilteringByEntryCountInput = document.createElement("input");
   enableFilteringByEntryCountInput.setAttribute("type", "checkbox");
@@ -556,6 +629,7 @@ function createFilterUiFilterOptionsRow() {
   row.style.paddingBottom = "5px";
   row.style.borderTop = "1px solid #d2d6e0";
   row.appendChild(flexGrowLeftDiv);
+  row.appendChild(flexGrowCenterDiv);    
   row.appendChild(flexGrowRightDiv);
   return row;
 }
@@ -882,47 +956,6 @@ function createFilterUiEnabledPagesRow() {
   var row = document.createElement("div");
   row.appendChild(firstRow);
   row.appendChild(secondRow);
-  return row;
-}
-
-// Creates a row with other options
-function createFilterUiOtherOptionsRow() {
-  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
-
-  // The "remove pagination" input checkbox
-  var removePaginationInput = document.createElement("input");
-  removePaginationInput.setAttribute("type", "checkbox");
-  removePaginationInput.style.width = "13px";
-  removePaginationInput.style.marginLeft = "9px";
-  removePaginationInput.checked = removePagination;
-  removePaginationInput.onclick = function() {
-    // Save the change and update the UI
-    GM_setValue(KEY_REMOVE_PAGINATION, removePaginationInput.checked);
-    filterGiveaways();
-  };
-
-  var removePaginationSpan = document.createElement("span");
-  removePaginationSpan.appendChild(document.createTextNode("Remove pagination"));
-
-  // Create and add the group GAs exclusion element
-  var flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
-  flexGrowLeftDiv.appendChild(removePaginationSpan);
-  flexGrowLeftDiv.appendChild(removePaginationInput);
-
-  // Create the row itself
-  var row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.alignItems = "center";
-  row.style.paddingTop = "5px";
-  row.style.paddingBottom = "5px";
-  row.style.borderTop = "1px solid #d2d6e0";
-  row.appendChild(flexGrowLeftDiv);
   return row;
 }
 
