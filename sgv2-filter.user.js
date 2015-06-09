@@ -233,7 +233,6 @@ function isFilteringEnabledOnCurrentPage() {
   var applyToNewGiveawaysView = GM_getValue(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW);
   var applyToUserProfileView = GM_getValue(KEY_APPLY_TO_USER_PROFILE_VIEW, DEFAULT_APPLY_TO_USER_PROFILE_VIEW);
   var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW);
-  var currentPage = window.location.href;
 
   if (applyToAllGiveawaysView && isCurrentPage(KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW)) {
     return true;
