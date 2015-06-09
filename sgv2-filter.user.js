@@ -297,7 +297,9 @@ function isFilteringEnabledOnCurrentPage() {
 function isCurrentPage(pageKey) {
   var currentPage = window.location.href;
   if (pageKey === KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0 || currentPage === "http://www.steamgifts.com" || currentPage === "http://www.steamgifts.com/");
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0
+      || currentPage === "http://www.steamgifts.com" || currentPage === "http://www.steamgifts.com/"
+      || currentPage === "http://www.steamgifts.com/giveaways");
   }
   if (pageKey === KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW) {
     return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
