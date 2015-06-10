@@ -453,7 +453,7 @@ function createFilterUiFilterOptionsRow() {
     } else if (minLevelToDisplayInputValue > maxLevelToDisplay) {
       minLevelToDisplayInput.value = maxLevelToDisplay;
     } else if (minLevelToDisplay != minLevelToDisplayInput.value) {
-			// If the value changed, save it and update the UI
+      // If the value changed, save it and update the UI
       GM_setValue(KEY_MIN_LEVEL_TO_DISPLAY, minLevelToDisplayInputValue);
       minLevelToDisplay = minLevelToDisplayInputValue;
       updateFilterCaption();
@@ -479,7 +479,7 @@ function createFilterUiFilterOptionsRow() {
     } else if (maxLevelToDisplayInputValue < minLevelToDisplay) {
       maxLevelToDisplayInput.value = minLevelToDisplay;
     } else if (maxLevelToDisplay != maxLevelToDisplayInput.value) {
-			// If the value changed, save it and update the UI
+      // If the value changed, save it and update the UI
       GM_setValue(KEY_MAX_LEVEL_TO_DISPLAY, maxLevelToDisplayInputValue);
       maxLevelToDisplay = maxLevelToDisplayInputValue;
       updateFilterCaption();
@@ -527,7 +527,7 @@ function createFilterUiFilterOptionsRow() {
     } else if (minPointsToDisplayInputValue > maxPointsToDisplay) {
       minPointsToDisplayInput.value = maxPointsToDisplay;
     } else if (minPointsToDisplay != minPointsToDisplayInput.value) {
-			// If the value changed, save it and update the UI 
+      // If the value changed, save it and update the UI 
       GM_setValue(KEY_MIN_POINTS_TO_DISPLAY, minPointsToDisplayInputValue);
       minPointsToDisplay = minPointsToDisplayInputValue;
       updateFilterCaption();
@@ -553,7 +553,7 @@ function createFilterUiFilterOptionsRow() {
     } else if (maxPointsToDisplayInputValue < minPointsToDisplay) {
       maxPointsToDisplayInput.value = minPointsToDisplay;
     } else if (maxPointsToDisplay != maxPointsToDisplayInput.value) {
-			// If the value changed, save it and update the UI
+      // If the value changed, save it and update the UI
       GM_setValue(KEY_MAX_POINTS_TO_DISPLAY, maxPointsToDisplayInputValue);
       maxPointsToDisplay = maxPointsToDisplayInputValue;
       updateFilterCaption();
