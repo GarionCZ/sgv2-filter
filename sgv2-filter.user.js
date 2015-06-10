@@ -448,10 +448,12 @@ function createFilterUiFilterOptionsRow() {
   minLevelToDisplayInput.onchange = function() {
     // Filter out invalid values
     var minLevelToDisplayInputValue = parseInt(minLevelToDisplayInput.value);
-    if (minLevelToDisplayInputValue < 0 || minLevelToDisplayInputValue > 10 || minLevelToDisplayInputValue > maxLevelToDisplay) {
-      minLevelToDisplayInput.value = minLevelToDisplay;
-    } else if (minLevelToDisplay != minLevelToDisplayInputValue) {
-      // If the value changed, save it and update the UI
+    if (minLevelToDisplayInputValue < DEFAULT_MIN_LEVEL_TO_DISPLAY) {
+      minLevelToDisplayInput.value = DEFAULT_MIN_LEVEL_TO_DISPLAY;
+    } else if (minLevelToDisplayInputValue > maxLevelToDisplay) {
+      minLevelToDisplayInput.value = maxLevelToDisplay;
+    } else if (minLevelToDisplay != minLevelToDisplayInput.value) {
+			// If the value changed, save it and update the UI
       GM_setValue(KEY_MIN_LEVEL_TO_DISPLAY, minLevelToDisplayInputValue);
       minLevelToDisplay = minLevelToDisplayInputValue;
       updateFilterCaption();
@@ -472,10 +474,12 @@ function createFilterUiFilterOptionsRow() {
   maxLevelToDisplayInput.onchange = function() {
     // Filter out invalid values
     var maxLevelToDisplayInputValue = parseInt(maxLevelToDisplayInput.value);
-    if (maxLevelToDisplayInputValue < 0 || maxLevelToDisplayInputValue > 10 || maxLevelToDisplayInputValue < minLevelToDisplay) {
-      maxLevelToDisplayInput.value = maxLevelToDisplay;
-    } else if (maxLevelToDisplay != maxLevelToDisplayInputValue) {
-      // If the value changed, save it and update the UI
+    if (maxLevelToDisplayInputValue > DEFAULT_MAX_LEVEL_TO_DISPLAY) {
+      maxLevelToDisplayInput.value = DEFAULT_MAX_LEVEL_TO_DISPLAY;
+    } else if (maxLevelToDisplayInputValue < minLevelToDisplay) {
+      maxLevelToDisplayInput.value = minLevelToDisplay;
+    } else if (maxLevelToDisplay != maxLevelToDisplayInput.value) {
+			// If the value changed, save it and update the UI
       GM_setValue(KEY_MAX_LEVEL_TO_DISPLAY, maxLevelToDisplayInputValue);
       maxLevelToDisplay = maxLevelToDisplayInputValue;
       updateFilterCaption();
@@ -518,10 +522,12 @@ function createFilterUiFilterOptionsRow() {
   minPointsToDisplayInput.onchange = function() {
     // Filter out invalid values
     var minPointsToDisplayInputValue = parseInt(minPointsToDisplayInput.value);
-    if (minPointsToDisplayInputValue < 0 || minPointsToDisplayInputValue > 150 || minPointsToDisplayInputValue > maxPointsToDisplay) {
-      minPointsToDisplayInput.value = minPointsToDisplay;
-    } else if (minPointsToDisplay != minPointsToDisplayInputValue) {
-      // If the value changed, save it and update the UI
+    if (minPointsToDisplayInputValue < DEFAULT_MIN_POINTS_TO_DISPLAY) {
+      minPointsToDisplayInput.value = DEFAULT_MIN_POINTS_TO_DISPLAY;
+    } else if (minPointsToDisplayInputValue > maxPointsToDisplay) {
+      minPointsToDisplayInput.value = maxPointsToDisplay;
+    } else if (minPointsToDisplay != minPointsToDisplayInput.value) {
+			// If the value changed, save it and update the UI 
       GM_setValue(KEY_MIN_POINTS_TO_DISPLAY, minPointsToDisplayInputValue);
       minPointsToDisplay = minPointsToDisplayInputValue;
       updateFilterCaption();
@@ -542,12 +548,12 @@ function createFilterUiFilterOptionsRow() {
   maxPointsToDisplayInput.onchange = function() {
     // Filter out invalid values
     var maxPointsToDisplayInputValue = parseInt(maxPointsToDisplayInput.value);
-    if (maxPointsToDisplayInputValue < 0 || maxPointsToDisplayInputValue < minPointsToDisplay) {
-      maxPointsToDisplayInput.value = maxPointsToDisplay;
-    } else if (maxPointsToDisplayInputValue > 150) {
+    if (maxPointsToDisplayInputValue > DEFAULT_MAX_POINTS_TO_DISPLAY) {
       maxPointsToDisplayInput.value = DEFAULT_MAX_POINTS_TO_DISPLAY;
-    } else if (maxPointsToDisplay != maxPointsToDisplayInputValue) {
-      // If the value changed, save it and update the UI
+    } else if (maxPointsToDisplayInputValue < minPointsToDisplay) {
+      maxPointsToDisplayInput.value = minPointsToDisplay;
+    } else if (maxPointsToDisplay != maxPointsToDisplayInput.value) {
+			// If the value changed, save it and update the UI
       GM_setValue(KEY_MAX_POINTS_TO_DISPLAY, maxPointsToDisplayInputValue);
       maxPointsToDisplay = maxPointsToDisplayInputValue;
       updateFilterCaption();
@@ -561,7 +567,7 @@ function createFilterUiFilterOptionsRow() {
     
   // Create and add the points filter
   var showPointsSpan = document.createElement("span");
-  showPointsSpan.appendChild(document.createTextNode("Show points:"));
+  showPointsSpan.appendChild(document.createTextNode("Points to enter:"));
   showPointsSpan.style.paddingRight = "5px";
 
   var pointsDashSpan = document.createElement("span");
@@ -1112,6 +1118,11 @@ function getFilterCaption() {
     var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, 200);
     filterCaption += ", Max " + maxNumberOfEntries + " entries";
   }
+
+  // Add the points range to the caption
+  var minPointsToDisplay = GM_getValue(KEY_MIN_POINTS_TO_DISPLAY, DEFAULT_MIN_POINTS_TO_DISPLAY);
+  var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
+  filterCaption += ", " + minPointsToDisplay + "-" + maxPointsToDisplay + " Points";
 
   // Add the excluded information to the caption
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
