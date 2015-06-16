@@ -174,11 +174,17 @@ function isGiveawayPinned(giveaway) {
 
 // Returns the contributor level of a giveaway, return 0 if no level is specified
 function getContributorLevel(giveaway) {
-  var contributorLevels = giveaway.getElementsByClassName("giveaway__column--contributor-level giveaway__column--contributor-level--positive");
-  // Since there is only one level in a giveaways, just take the first item if available
+  var contributorLevels = [];
+
+  var contributorLevelsPositive = giveaway.getElementsByClassName("giveaway__column--contributor-level giveaway__column--contributor-level--positive");
+  var contributorLevelsNegative = giveaway.getElementsByClassName("giveaway__column--contributor-level giveaway__column--contributor-level--negative");
+  contributorLevels.push.apply(contributorLevels, contributorLevelsPositive);
+  contributorLevels.push.apply(contributorLevels, contributorLevelsNegative);
+
   if (contributorLevels.length === 0) {
     return 0;
   }
+  
   var contributorLevel = contributorLevels[0].innerHTML;
 
   var substringStart = 0;
@@ -577,7 +583,7 @@ function createFilterUiFilterOptionsRow() {
   flexGrowLeftDiv.appendChild(minLevelToDisplayInput);
   flexGrowLeftDiv.appendChild(levelDashSpan);
   flexGrowLeftDiv.appendChild(maxLevelToDisplayInput);
-    
+
   // The "minimal points to display" number input
   var minPointsToDisplayInput = document.createElement("input");
   minPointsToDisplayInput.setAttribute("type", "number");
@@ -631,7 +637,7 @@ function createFilterUiFilterOptionsRow() {
   maxPointsToDisplayInput.onkeypress = function(event) {
     return isDigit(event.charCode);
   };
-    
+
   // Create and add the points filter
   var showPointsSpan = document.createElement("span");
   showPointsSpan.appendChild(document.createTextNode("Points to enter:"));
@@ -648,7 +654,7 @@ function createFilterUiFilterOptionsRow() {
   flexGrowCenterDiv.style.justifyContent = "flex-start";
   flexGrowCenterDiv.style.flexGrow = "1";
   flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center"; 
+  flexGrowCenterDiv.align = "center";
   flexGrowCenterDiv.appendChild(showPointsSpan);
   flexGrowCenterDiv.appendChild(minPointsToDisplayInput);
   flexGrowCenterDiv.appendChild(pointsDashSpan);
