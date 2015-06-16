@@ -265,6 +265,7 @@ function handlePinnedBlock() {
 
 }
 
+var giveawayOrder = 1;
 // Handles the pagination. Moves the GAs in SG++ grid layout into one grid if pagination should be removed
 function handlePagination() {
   var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
@@ -279,22 +280,84 @@ function handlePagination() {
     }
   }
 
-  // Move the GAs in SG++ grid layout to the first grid
+  // GAs should be moved to the first gridview if using the SG++ GA grid view
   var sgppGridviews = document.getElementsByClassName("SGPP__gridView");
   if (sgppGridviews.length > 0) {
+    // Tag the giveaways
+    for ( i = 0; i < sgppGridviews.length; i++) {
+      var sgppGiveawayDivs = sgppGridviews[i].getElementsByClassName("SGPP__gridTile");
+      var pageNumber = getSgppPageNumber(sgppGridviews[i]);
+      for ( j = 0; j < sgppGiveawayDivs.length; j++) {
+        if (sgppGiveawayDivs[j].dataset.originalPage === undefined) {
+          sgppGiveawayDivs[j].dataset.originalPage = pageNumber;
+        }
+        if (sgppGiveawayDivs[j].dataset.order === undefined) {
+          sgppGiveawayDivs[j].dataset.order = giveawayOrder++;
+        }
+      }
+    }
+
+    var sgppFirstGridview = sgppGridviews[0];
+    for ( i = 0; i < sgppGridviews.length; i++) {
+      if(getSgppPageNumber(sgppGridviews[i]) === 1) {
+        sgppFirstGridview = sgppGridviews[i];
+        break;
+      }
+    }
+
     if (removePagination) {
-      var sgppFirstGridview = sgppGridviews[0];
-      for (i = 1; i < sgppGridviews.length; i++) {
+      // Move the GAs in SG++ grid layout to the first grid
+      for ( i = 1; i < sgppGridviews.length; i++) {
         var currentGridview = sgppGridviews[i];
         var sgppGiveawayDivs = currentGridview.getElementsByClassName("SGPP__gridTile");
-        for (j = 0; j < sgppGiveawayDivs.length; j++) {
-          currentGridview.removeChild(sgppGiveawayDivs[j]);
-          sgppFirstGridview.appendChild(sgppGiveawayDivs[j]);
+        for ( j = 0; j < sgppGiveawayDivs.length; j++) {
+          var sgppGiveawayDiv = sgppGiveawayDivs[j];
+          currentGridview.removeChild(sgppGiveawayDiv);
+          insertGiveawayIntoGridview(sgppGiveawayDiv, sgppFirstGridview);
+        }
+      }
+    } else {
+      // Move the GAs back from the first grid to their respective page grids
+      var sgppGiveawayDivs = sgppFirstGridview.getElementsByClassName("SGPP__gridTile");
+      for ( i = 0; i < sgppGiveawayDivs.length; i++) {
+        var sgppGiveawayDiv = sgppGiveawayDivs[i];
+        var originalPage = parseInt(sgppGiveawayDiv.dataset.originalPage);
+        if (originalPage > 1) {
+          sgppFirstGridview.removeChild(sgppGiveawayDiv);
+          for ( j = 0; j < sgppGridviews.length; j++) {
+            var pageNumber = getSgppPageNumber(sgppGridviews[j]);
+            if (pageNumber === originalPage) {
+              insertGiveawayIntoGridview(sgppGiveawayDiv, sgppGridviews[j]);
+              break;
+            }
+          }
         }
       }
     }
   }
+}
 
+// Determines the page number from SG++ grid view
+function getSgppPageNumber(sgppGridview) {
+  var currentPage = sgppGridview.previousElementSibling.getElementsByClassName("endless_page")[0].innerHTML;
+  var pageNumber = parseInt(currentPage.substring(5, currentPage.indexOf(" ", 6)));
+  return pageNumber;
+}
+
+// Inserts a GA into specified gridview based on its dataset.order value
+function insertGiveawayIntoGridview(giveaway, gridview) {
+  var sgppSortedGiveawayDivs = gridview.getElementsByClassName("SGPP__gridTile");
+  var inserted = false;
+  for ( i = 0; i < sgppSortedGiveawayDivs.length; i++) {
+    if (parseInt(sgppSortedGiveawayDivs[i].dataset.order) > parseInt(giveaway.dataset.order)) {
+      gridview.insertBefore(giveaway, sgppSortedGiveawayDivs[i]);
+      inserted = true;
+      break;
+    }
+  }
+  if (!inserted) {
+    gridview.appendChild(giveaway);
+  }
 }
 
 // Returns true if filtering is enabled on the current page, false otherwise
