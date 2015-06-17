@@ -1157,10 +1157,10 @@ function createFilterUiOtherOptionsRow() {
   var flexGrowLeftDiv = document.createElement("div");
   flexGrowLeftDiv.style.display = "flex";
   flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
+  flexGrowLeftDiv.style.justifyContent = "center";
   flexGrowLeftDiv.style.flexGrow = "1";
   flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.align = "center";
   flexGrowLeftDiv.appendChild(removePaginationSpan);
   flexGrowLeftDiv.appendChild(removePaginationInput);
 
