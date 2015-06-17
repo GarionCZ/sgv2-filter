@@ -14,6 +14,7 @@
 // Keys for persistent settings, the keys for different views also represent "page keys" used as certain parameters to make things more simple
 var KEY_EXCLUDE_GROUP_GIVEAWAYS = "excludeGroupGiveaways";
 var KEY_EXCLUDE_WHITELIST_GIVEAWAYS = "excludeWhitelistGiveaways";
+var KEY_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS = "excludeRegionalGiveaways"
 var KEY_EXCLUDE_PINNED_GIVEAWAYS = "excludePinnedGiveaways";
 var KEY_ENABLE_FILTERING_BY_ENTRY_COUNT = "enableFilteringByEntryCount";
 var KEY_MAX_NUMBER_OF_ENTRIES = "maxNumberOfEntries";
@@ -32,6 +33,7 @@ var KEY_REMOVE_PAGINATION = "removePagination";
 // Default values of persistent settings
 var DEFAULT_EXCLUDE_GROUP_GIVEAWAYS = true;
 var DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS = true;
+var DEFAULT_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS = false;
 var DEFAULT_EXCLUDE_PINNED_GIVEAWAYS = false;
 var DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT = true;
 var DEFAULT_MAX_NUMBER_OF_ENTRIES = 200;
@@ -75,6 +77,7 @@ function filterGiveaways() {
   var maxPointsToDisplay = GM_getValue(KEY_MAX_POINTS_TO_DISPLAY, DEFAULT_MAX_POINTS_TO_DISPLAY);
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
+  var excludeRegionRestrictedGiveaways = GM_getValue(KEY_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS, DEFAULT_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
@@ -102,6 +105,13 @@ function filterGiveaways() {
     // Handle pinned giveaways
     if (excludePinnedGiveaways) {
       if (isGiveawayPinned(giveaways[i])) {
+        continue;
+      }
+    }
+
+    // Handle region-restricted giveaways
+    if (excludeRegionRestrictedGiveaways) {
+      if (isGiveawayRegionRestricted(giveaways[i])) {
         continue;
       }
     }
@@ -164,6 +174,11 @@ function isGiveawayFromWhitelist(giveaway) {
 // Returns true if the giveaway is for a group, false otherwise
 function isGiveawayFromGroup(giveaway) {
   return giveaway.getElementsByClassName("giveaway__column--group").length > 0;
+}
+
+// Returns true if the giveaway is region-restricted, false otherwise
+function isGiveawayRegionRestricted(giveaway) {
+  return giveaway.getElementsByClassName("giveaway__column--region-restricted").length > 0;
 }
 
 // Returns true if the giveaway is pinned, false otherwise
@@ -755,6 +770,7 @@ function createFilterUiExcludeOptionsRow() {
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
+  var excludeRegionRestrictedGiveaways = GM_getValue(KEY_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS, DEFAULT_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS);
 
   // The "exlude group GAs" input checkbox
   var excludeGroupGiveawaysInput = document.createElement("input");
@@ -839,16 +855,59 @@ function createFilterUiExcludeOptionsRow() {
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysSpan);
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysInput);
 
+  // Create the first row
+  var firstRow = document.createElement("div");
+  firstRow.style.display = "flex";
+  firstRow.style.alignItems = "center";
+  firstRow.style.paddingTop = "5px";
+  firstRow.style.paddingBottom = "5px";
+  firstRow.style.borderTop = "1px solid #d2d6e0";
+  firstRow.appendChild(flexGrowLeftDiv);
+  firstRow.appendChild(flexGrowCenterDiv);
+  firstRow.appendChild(flexGrowRightDiv);
+
+  // The "exclude region-restricted giveaways" input checkbox
+  var excludeRegionRestrictedGiveawaysInput = document.createElement("input");
+  excludeRegionRestrictedGiveawaysInput.setAttribute("type", "checkbox");
+  excludeRegionRestrictedGiveawaysInput.style.width = "13px";
+  excludeRegionRestrictedGiveawaysInput.style.marginLeft = "9px";
+  excludeRegionRestrictedGiveawaysInput.checked = excludeRegionRestrictedGiveaways;
+  excludeRegionRestrictedGiveawaysInput.onclick = function() {
+    // Upon value change
+    GM_setValue(KEY_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS, excludeRegionRestrictedGiveawaysInput.checked);
+    excludeRegionRestrictedGiveaways = excludeRegionRestrictedGiveawaysInput.checked;
+    // Update the main UI
+    updateFilterCaption();
+    filterGiveaways();
+  };
+
+  // Create and add the "exclude region-restricted giveaways" text
+  var excludeRegionRestrictedGiveawaysSpan = document.createElement("span");
+  excludeRegionRestrictedGiveawaysSpan.appendChild(document.createTextNode("Exclude region-restricted giveaways"));
+
+  // Create the "exclude region-restricted giveaways" element itself
+  flexGrowLeftDiv = document.createElement("div");
+  flexGrowLeftDiv.style.display = "flex";
+  flexGrowLeftDiv.style.alignItems = "center";
+  flexGrowLeftDiv.style.justifyContent = "center";
+  flexGrowLeftDiv.style.flexGrow = "1";
+  flexGrowLeftDiv.style.flexBasis = "0";
+  flexGrowLeftDiv.align = "center";
+  flexGrowLeftDiv.appendChild(excludeRegionRestrictedGiveawaysSpan);
+  flexGrowLeftDiv.appendChild(excludeRegionRestrictedGiveawaysInput);
+
+  // Create the second row in the filter details
+  var secondRow = document.createElement("div");
+  secondRow.style.display = "flex";
+  secondRow.style.alignItems = "center";
+  secondRow.style.paddingTop = "5px";
+  secondRow.style.paddingBottom = "5px";
+  secondRow.appendChild(flexGrowLeftDiv);
+
   // Create the row itself
   var row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.alignItems = "center";
-  row.style.paddingTop = "5px";
-  row.style.paddingBottom = "5px";
-  row.style.borderTop = "1px solid #d2d6e0";
-  row.appendChild(flexGrowLeftDiv);
-  row.appendChild(flexGrowCenterDiv);
-  row.appendChild(flexGrowRightDiv);
+  row.appendChild(firstRow);
+  row.appendChild(secondRow);
   return row;
 }
 
@@ -1200,6 +1259,7 @@ function getFilterCaption() {
   // Add the excluded information to the caption
   var excludeWhitelistGiveaways = GM_getValue(KEY_EXCLUDE_WHITELIST_GIVEAWAYS, DEFAULT_EXCLUDE_WHITELIST_GIVEAWAYS);
   var excludeGroupGiveaways = GM_getValue(KEY_EXCLUDE_GROUP_GIVEAWAYS, DEFAULT_EXCLUDE_GROUP_GIVEAWAYS);
+  var excludeRegionRestrictedGiveaways = GM_getValue(KEY_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS, DEFAULT_EXCLUDE_REGION_RESTRICTED_GIVEAWAYS);
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
   var excluded = "";
   if (excludeGroupGiveaways) {
@@ -1216,6 +1276,12 @@ function getFilterCaption() {
       excluded += "/";
     }
     excluded += "Pinned";
+  }
+  if (excludeRegionRestrictedGiveaways) {
+    if (excluded !== "") {
+      excluded += "/";
+    }
+    excluded += "Regional";
   }
   if (excluded !== "") {
     excluded = ", " + excluded + " GAs excluded";
