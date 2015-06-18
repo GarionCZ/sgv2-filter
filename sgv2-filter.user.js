@@ -226,7 +226,7 @@ function getContributorLevel(giveaway) {
   // Parse the level, remove the "+" from the end
   var level = contributorLevel.substring(substringStart, contributorLevel.length - 1);
 
-  return level;
+  return parseInt(level);
 }
 
 
@@ -249,7 +249,7 @@ function getPoints(giveaway) {
   // Parse the points, remove the "P)" from the end
   var points = pointsTxt.substring(substringStart, pointsTxt.length - 2);
 
-  return points;
+  return parseInt(points);
 }
 
 // Parses the number of entries for a giveaway
