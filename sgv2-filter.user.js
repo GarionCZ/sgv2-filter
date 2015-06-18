@@ -29,6 +29,7 @@ var KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW = "applyToNewGiveawaysView";
 var KEY_APPLY_TO_USER_PROFILE_VIEW = "applyToUserProfileView";
 var KEY_APPLY_TO_SEARCH_RESULTS_VIEW = "applyToSearchResultsView";
 var KEY_REMOVE_PAGINATION = "removePagination";
+var KEY_HIDE_ENTERED_GIVEAWAYS = "hideEnteredGiveaways";
 
 // Default values of persistent settings
 var DEFAULT_EXCLUDE_GROUP_GIVEAWAYS = true;
@@ -48,6 +49,7 @@ var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
 var DEFAULT_KEY_REMOVE_PAGINATION = true;
+var DEFAULT_HIDE_ENTERED_GIVEAWAYS = false;
 
 // IDs of filter UI elements
 var FILTER_CONTROLS_ID = "filterControls";
@@ -81,6 +83,7 @@ function filterGiveaways() {
   var excludePinnedGiveaways = GM_getValue(KEY_EXCLUDE_PINNED_GIVEAWAYS, DEFAULT_EXCLUDE_PINNED_GIVEAWAYS);
   var enableFilteringByEntryCount = GM_getValue(KEY_ENABLE_FILTERING_BY_ENTRY_COUNT, DEFAULT_ENABLE_FILTERING_BY_ENTRY_COUNT);
   var maxNumberOfEntries = GM_getValue(KEY_MAX_NUMBER_OF_ENTRIES, DEFAULT_MAX_NUMBER_OF_ENTRIES);
+  var hideEnteredGiveaways = GM_getValue(KEY_HIDE_ENTERED_GIVEAWAYS, DEFAULT_HIDE_ENTERED_GIVEAWAYS);
 
   var giveawaysToRemove = [];
   var giveaways = getGiveaways();
@@ -112,6 +115,14 @@ function filterGiveaways() {
     // Handle region-restricted giveaways
     if (excludeRegionRestrictedGiveaways) {
       if (isGiveawayRegionRestricted(giveaways[i])) {
+        continue;
+      }
+    }
+
+    // Handle entered giveaways
+    if (hideEnteredGiveaways) {
+      if (isGiveawayEntered(giveaways[i])) {
+        giveawaysToRemove.push(giveaways[i]);
         continue;
       }
     }
@@ -185,6 +196,10 @@ function isGiveawayRegionRestricted(giveaway) {
 function isGiveawayPinned(giveaway) {
   var outerParent = giveaway.parentElement.parentElement;
   return outerParent.className === "pinned-giveaways__outer-wrap";
+}
+
+function isGiveawayEntered(giveaway) {
+  return giveaway.getElementsByClassName("giveaway__row-inner-wrap is-faded").length > 0;
 }
 
 // Returns the contributor level of a giveaway, return 0 if no level is specified
@@ -1137,6 +1152,7 @@ function createFilterUiEnabledPagesRow() {
 // Creates a row with other options
 function createFilterUiOtherOptionsRow() {
   var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
+  var hideEnteredGiveaways = GM_getValue(KEY_HIDE_ENTERED_GIVEAWAYS, DEFAULT_HIDE_ENTERED_GIVEAWAYS);
 
   // The "remove pagination" input checkbox
   var removePaginationInput = document.createElement("input");
@@ -1164,6 +1180,32 @@ function createFilterUiOtherOptionsRow() {
   flexGrowLeftDiv.appendChild(removePaginationSpan);
   flexGrowLeftDiv.appendChild(removePaginationInput);
 
+  // The "remove pagination" input checkbox
+  var hideEnteredGiveawaysInput = document.createElement("input");
+  hideEnteredGiveawaysInput.setAttribute("type", "checkbox");
+  hideEnteredGiveawaysInput.style.width = "13px";
+  hideEnteredGiveawaysInput.style.marginLeft = "9px";
+  hideEnteredGiveawaysInput.checked = hideEnteredGiveaways;
+  hideEnteredGiveawaysInput.onclick = function() {
+    // Save the change and update the UI
+    GM_setValue(KEY_HIDE_ENTERED_GIVEAWAYS, hideEnteredGiveawaysInput.checked);
+    filterGiveaways();
+  };
+
+  var hideEnteredGiveawaysSpan = document.createElement("span");
+  hideEnteredGiveawaysSpan.appendChild(document.createTextNode("Hide entered giveaways"));
+
+  // Create and add the group GAs exclusion element
+  var flexGrowCenterDiv = document.createElement("div");
+  flexGrowCenterDiv.style.display = "flex";
+  flexGrowCenterDiv.style.alignItems = "center";
+  flexGrowCenterDiv.style.justifyContent = "center";
+  flexGrowCenterDiv.style.flexGrow = "1";
+  flexGrowCenterDiv.style.flexBasis = "0";
+  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.appendChild(hideEnteredGiveawaysSpan);
+  flexGrowCenterDiv.appendChild(hideEnteredGiveawaysInput);
+
   // Create the row itself
   var row = document.createElement("div");
   row.style.display = "flex";
@@ -1172,6 +1214,7 @@ function createFilterUiOtherOptionsRow() {
   row.style.paddingBottom = "5px";
   row.style.borderTop = "1px solid #d2d6e0";
   row.appendChild(flexGrowLeftDiv);
+  row.appendChild(flexGrowCenterDiv);
   return row;
 }
 
