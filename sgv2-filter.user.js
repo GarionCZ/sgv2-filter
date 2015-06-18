@@ -48,7 +48,7 @@ var DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
-var DEFAULT_KEY_REMOVE_PAGINATION = true;
+var DEFAULT_REMOVE_PAGINATION = true;
 var DEFAULT_HIDE_ENTERED_GIVEAWAYS = false;
 
 // IDs of filter UI elements
@@ -304,7 +304,7 @@ function handlePinnedBlock() {
 var giveawayOrder = 1;
 // Handles the pagination. Moves the GAs in SG++ grid layout into one grid if pagination should be removed
 function handlePagination() {
-  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
+  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_REMOVE_PAGINATION);
 
   // Handle the pagination itself, leave the last pagination element in place (the magical -2 in the loop condition)
   var paginationDivs = document.getElementsByClassName("table__heading");
@@ -1151,7 +1151,7 @@ function createFilterUiEnabledPagesRow() {
 
 // Creates a row with other options
 function createFilterUiOtherOptionsRow() {
-  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_KEY_REMOVE_PAGINATION);
+  var removePagination = GM_getValue(KEY_REMOVE_PAGINATION, DEFAULT_REMOVE_PAGINATION);
   var hideEnteredGiveaways = GM_getValue(KEY_HIDE_ENTERED_GIVEAWAYS, DEFAULT_HIDE_ENTERED_GIVEAWAYS);
 
   // The "remove pagination" input checkbox
