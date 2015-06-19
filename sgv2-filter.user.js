@@ -199,7 +199,8 @@ function isGiveawayPinned(giveaway) {
 }
 
 function isGiveawayEntered(giveaway) {
-  return giveaway.getElementsByClassName("giveaway__row-inner-wrap is-faded").length > 0;
+  return giveaway.getElementsByClassName("giveaway__row-inner-wrap is-faded").length > 0 ||
+    giveaway.className === "SGPP__gridTile is-faded";
 }
 
 // Returns the contributor level of a giveaway, return 0 if no level is specified
