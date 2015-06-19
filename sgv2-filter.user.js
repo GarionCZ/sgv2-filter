@@ -236,21 +236,35 @@ function getContributorLevel(giveaway) {
 function getPoints(giveaway) {
   var pointsEle = giveaway.getElementsByClassName("giveaway__heading__thin");
   // Since the points are the last element in a giveaway, just take the last item if available
-  if (pointsEle.length === 0) {
-    return 0;
+  if (pointsEle.length > 0) {
+    var pointsTxt = pointsEle[pointsEle.length-1].innerHTML;
+
+    var substringStart = 0;
+    // Remove the "(" at the start of the string, if present (SG++ grid view doesn't have it)
+    if (pointsTxt.indexOf("(") === 0) {
+      substringStart = 1;
+    }
+
+    // Parse the points, remove the "P)" from the end
+    var points = pointsTxt.substring(substringStart, pointsTxt.length - 2);
+
+    return parseInt(points);
   }
-  var pointsTxt = pointsEle[pointsEle.length-1].innerHTML;
 
-  var substringStart = 0;
-  // Remove the "(" at the start of the string, if present (SG++ grid view doesn't have it)
-  if (pointsTxt.indexOf("(") === 0) {
-    substringStart = 1;
+  // SG++ GridView
+  pointsEle = giveaway.getElementsByClassName("SGPP__gridTileInfo global__image-outer-wrap");
+  if (pointsEle.length > 0) {
+    // Go through the element and find the points part, can't really find it any easier since the elements have no IDs and no classes
+    var pointsTxt = pointsEle[0].children[2].children[1].children[0].innerHTML;
+
+    // Parse the points, remove the "P" from the end
+    var points = pointsTxt.substring(0, pointsTxt.length - 1);
+    return parseInt(points);
   }
 
-  // Parse the points, remove the "P)" from the end
-  var points = pointsTxt.substring(substringStart, pointsTxt.length - 2);
+  // If nothing could be parsed, return 0
+  return 0;
 
-  return parseInt(points);
 }
 
 // Parses the number of entries for a giveaway
