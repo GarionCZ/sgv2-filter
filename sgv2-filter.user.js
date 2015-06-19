@@ -696,7 +696,7 @@ function createFilterUiFilterOptionsRow() {
   var flexGrowCenterDiv = document.createElement("div");
   flexGrowCenterDiv.style.display = "flex";
   flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "flex-start";
+  flexGrowCenterDiv.style.justifyContent = "center";
   flexGrowCenterDiv.style.flexGrow = "1";
   flexGrowCenterDiv.style.flexBasis = "0";
   flexGrowCenterDiv.align = "center";
@@ -764,6 +764,9 @@ function createFilterUiFilterOptionsRow() {
   // Create and add the entry count filter
   var entryFilteringEnabledSpan = document.createElement("span");
   entryFilteringEnabledSpan.appendChild(document.createTextNode("Entry count filtering"));
+  entryFilteringEnabledSpan.style.display = "flex";
+  entryFilteringEnabledSpan.style.flexGrow = "1";
+  entryFilteringEnabledSpan.style.flexBasis = "0";
 
   var entryFilteringCountSpan = document.createElement("span");
   entryFilteringCountSpan.appendChild(document.createTextNode("Max # of entries:"));
