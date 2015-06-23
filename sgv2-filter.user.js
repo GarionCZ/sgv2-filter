@@ -315,9 +315,9 @@ function handlePinnedBlock() {
   }
 
   if (giveawayRemaining) {
-    pinnedBlock.style.display = "";
+    pinnedBlocks[0].style.display = "";
   } else {
-    pinnedBlock.style.display = "none";
+    pinnedBlocks[0].style.display = "none";
   }
 
 }
