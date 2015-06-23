@@ -297,8 +297,14 @@ function removeFiltering(giveaway) {
 
 // Hides the pinned block completely if all the giveaways got filtered, shows it if it contains at least one giveaway
 function handlePinnedBlock() {
-  var pinnedBlock = document.getElementsByClassName("pinned-giveaways__outer-wrap")[0];
-  var pinnedGiveaways = pinnedBlock.getElementsByClassName("giveaway__row-outer-wrap");
+  var pinnedBlocks = document.getElementsByClassName("pinned-giveaways__outer-wrap");
+
+  // No pinned giveaways
+  if (pinnedBlocks.length === 0) {
+    return;
+  }
+
+  var pinnedGiveaways = pinnedBlocks[0].getElementsByClassName("giveaway__row-outer-wrap");
   var giveawayRemaining = false;
 
   for ( i = 0; i < pinnedGiveaways.length; i++) {
@@ -1262,6 +1268,15 @@ function insertFilterUi(filterUi) {
   if (elements.length > 0) {
     var parent = elements[0].parentElement;
     parent.insertBefore(filterUi, parent.childNodes[2]);
+    return;
+  }
+
+  // Insert into the main giveaway UI if there are no pinned GAs
+  elements = document.getElementsByClassName("page__heading");
+  // Since "page__heading" is on multiple pages, a check needs to be done that user is on the correct page
+  if (document.getElementsByClassName("featured__container").length > 0 && elements.length > 0) {
+    var parent = elements[0].parentElement;
+    parent.insertBefore(filterUi, parent.childNodes[1]);
     return;
   }
 
