@@ -6,7 +6,7 @@
 // @include     http://www.steamgifts.com/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
-// @version     0.3.0-DEV
+// @version     0.4.0-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
