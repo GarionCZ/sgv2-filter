@@ -6,7 +6,7 @@
 // @include     http://www.steamgifts.com/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
-// @version     0.4.1-DEV
+// @version     0.4.2-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -29,7 +29,8 @@ var KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW = "applyToNewGiveawaysView";
 var KEY_APPLY_TO_USER_PROFILE_VIEW = "applyToUserProfileView";
 var KEY_APPLY_TO_SEARCH_RESULTS_VIEW = "applyToSearchResultsView";
 var KEY_REMOVE_PAGINATION = "removePagination";
-var KEY_HIDE_ENTERED_GIVEAWAYS = "hideEnteredGiveaways";
+var KEY_HIDE_ENTERED_GIVEAWAYS = "hideEnteredGiveaways_2";
+var HIDE_ENTERED_GIVEAWAYS_CONSTANTS = ["No", "Yes", "Always"];
 
 // Default values of persistent settings
 var DEFAULT_EXCLUDE_GROUP_GIVEAWAYS = true;
@@ -49,7 +50,7 @@ var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
 var DEFAULT_REMOVE_PAGINATION = true;
-var DEFAULT_HIDE_ENTERED_GIVEAWAYS = false;
+var DEFAULT_HIDE_ENTERED_GIVEAWAYS = HIDE_ENTERED_GIVEAWAYS_CONSTANTS[0];
 
 // IDs of filter UI elements
 var FILTER_CONTROLS_ID = "filterControls";
@@ -91,6 +92,14 @@ function filterGiveaways() {
     // Remove the filtering
     removeFiltering(giveaways[i]);
 
+    // Handle entered giveaways - ALWAYS option
+    if (hideEnteredGiveaways === HIDE_ENTERED_GIVEAWAYS_CONSTANTS[2]) {
+      if (isGiveawayEntered(giveaways[i])) {
+        giveawaysToRemove.push(giveaways[i]);
+        continue;
+      }
+    }
+
     // Handle whitelist giveaways
     if (excludeWhitelistGiveaways) {
       if (isGiveawayFromWhitelist(giveaways[i])) {
@@ -119,8 +128,8 @@ function filterGiveaways() {
       }
     }
 
-    // Handle entered giveaways
-    if (hideEnteredGiveaways) {
+    // Handle entered giveaways - YES option
+    if (hideEnteredGiveaways === HIDE_ENTERED_GIVEAWAYS_CONSTANTS[1]) {
       if (isGiveawayEntered(giveaways[i])) {
         giveawaysToRemove.push(giveaways[i]);
         continue;
@@ -515,6 +524,8 @@ function isCurrentPage(pageKey) {
   // Append a CSS to the page itself so the caption changes its background color slightly when hovered over
   var captionHoverCss = '#' + FILTER_CAPTION_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
   captionHoverCss += '#' + FILTER_HIDE_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
+  captionHoverCss += ".help-tip{ position: static; text-align: center; border-style: dotted; border-width: 1px; margin-left: 2px; margin-right: -5px; padding: 1px; cursor: help;}";
+  captionHoverCss += "[data-tooltip]:before { /* needed - do not touch */ content: attr(data-tooltip); position: absolute; opacity: 0; pointer-events: none; /* customizable */ transition: all 0.10s ease; padding: 5px; box-shadow: 1px 1px 1px; } [data-tooltip]:hover:before { /* needed - do not touch */ opacity: 1; /* customizable */ background: white; margin-top: -50px; /*margin-left: 20px;*/ }";
   var style = document.createElement('style');
   if (style.styleSheet) {
     style.styleSheet.cssText = captionHoverCss;
@@ -1205,19 +1216,29 @@ function createFilterUiOtherOptionsRow() {
   flexGrowLeftDiv.appendChild(removePaginationInput);
 
   // The "remove pagination" input checkbox
-  var hideEnteredGiveawaysInput = document.createElement("input");
-  hideEnteredGiveawaysInput.setAttribute("type", "checkbox");
-  hideEnteredGiveawaysInput.style.width = "13px";
-  hideEnteredGiveawaysInput.style.marginLeft = "9px";
-  hideEnteredGiveawaysInput.checked = hideEnteredGiveaways;
-  hideEnteredGiveawaysInput.onclick = function() {
+  var hideEnteredGiveawaysSelect = document.createElement("select");
+  for ( i = 0; i < HIDE_ENTERED_GIVEAWAYS_CONSTANTS.length; i++ ) {
+    var option = document.createElement('option');
+    option.value = option.textContent = HIDE_ENTERED_GIVEAWAYS_CONSTANTS[i];
+    hideEnteredGiveawaysSelect.appendChild(option);
+  }
+
+  hideEnteredGiveawaysSelect.value = hideEnteredGiveaways;
+  hideEnteredGiveawaysSelect.style.width = "90px";
+  hideEnteredGiveawaysSelect.style.marginLeft = "9px";
+  hideEnteredGiveawaysSelect.onchange = function() {
     // Save the change and update the UI
-    GM_setValue(KEY_HIDE_ENTERED_GIVEAWAYS, hideEnteredGiveawaysInput.checked);
+    var selectedValue = hideEnteredGiveawaysSelect.options[hideEnteredGiveawaysSelect.selectedIndex].value;
+    GM_setValue(KEY_HIDE_ENTERED_GIVEAWAYS, selectedValue);
     filterGiveaways();
   };
 
   var hideEnteredGiveawaysSpan = document.createElement("span");
   hideEnteredGiveawaysSpan.appendChild(document.createTextNode("Hide entered giveaways"));
+  var helpTooltip = document.createElement("div");
+  helpTooltip.dataset.tooltip = '"Yes" hides entered giveaways, but exclusions still apply. "Always" hides entered giveaways no matter the other filter options.';
+  helpTooltip.className = "help-tip";
+  helpTooltip.appendChild(document.createTextNode("?"));
 
   // Create and add the group GAs exclusion element
   var flexGrowCenterDiv = document.createElement("div");
@@ -1228,7 +1249,8 @@ function createFilterUiOtherOptionsRow() {
   flexGrowCenterDiv.style.flexBasis = "0";
   flexGrowCenterDiv.align = "center";
   flexGrowCenterDiv.appendChild(hideEnteredGiveawaysSpan);
-  flexGrowCenterDiv.appendChild(hideEnteredGiveawaysInput);
+  flexGrowCenterDiv.appendChild(helpTooltip);
+  flexGrowCenterDiv.appendChild(hideEnteredGiveawaysSelect);
 
   // Create the row itself
   var row = document.createElement("div");
