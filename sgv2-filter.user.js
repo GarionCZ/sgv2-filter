@@ -3,6 +3,7 @@
 // @namespace   https://github.com/GarionCZ/sgv2-filter
 // @description Giveaway filter for SteamGifts v2
 // @author      Garion
+// @include     http://www.steamgifts.com/
 // @include     http://www.steamgifts.com/giveaways*
 // @include     http://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
