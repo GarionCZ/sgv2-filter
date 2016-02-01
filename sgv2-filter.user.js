@@ -6,7 +6,7 @@
 // @include     http://www.steamgifts.com/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
-// @version     0.4.2-DEV
+// @version     0.4.3-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -491,8 +491,7 @@ function isCurrentPage(pageKey) {
 (function drawUi() {
   // Create the filter details element and add content to it
   var detailsContentDiv = document.createElement("div");
-  detailsContentDiv.style.paddingLeft = "10px";
-  detailsContentDiv.style.paddingRight = "10px";
+  detailsContentDiv.setAttribute("class", 'pinned-giveaways__inner-wrap filterDetails');
   detailsContentDiv.appendChild(createFilterUiFilterOptionsRow());
   detailsContentDiv.appendChild(createFilterUiExcludeOptionsRow());
   detailsContentDiv.appendChild(createFilterUiEnabledPagesRow());
@@ -507,12 +506,7 @@ function isCurrentPage(pageKey) {
   // Create the filter UI element
   var controlsDiv = document.createElement("div");
   controlsDiv.setAttribute("id", FILTER_CONTROLS_ID);
-  controlsDiv.style.border = "1px solid #d2d6e0";
-  controlsDiv.style.borderRadius = "4px";
-  controlsDiv.style.backgroundColor = "#E8EAEF";
-  controlsDiv.style.marginBottom = "5px";
-  controlsDiv.style.marginTop = "5px";
-  controlsDiv.style.textShadow = "1px 1px rgba(255,255,255,0.90)";
+  controlsDiv.setAttribute("class", 'pinned-giveaways__inner-wrap');
 
   controlsDiv.appendChild(createFilterUiCaptionRow());
   controlsDiv.appendChild(detailsDiv);
@@ -521,16 +515,33 @@ function isCurrentPage(pageKey) {
   insertFilterUi(controlsDiv);
   updateFilterCaptionTextColor();
 
-  // Append a CSS to the page itself so the caption changes its background color slightly when hovered over
-  var captionHoverCss = '#' + FILTER_CAPTION_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
-  captionHoverCss += '#' + FILTER_HIDE_ID + ':hover{background-color:rgba(255,255,255,0.60);}';
-  captionHoverCss += ".help-tip{ position: static; text-align: center; border-style: dotted; border-width: 1px; margin-left: 2px; margin-right: -5px; padding: 1px; cursor: help;}";
-  captionHoverCss += "[data-tooltip]:before { /* needed - do not touch */ content: attr(data-tooltip); position: absolute; opacity: 0; pointer-events: none; /* customizable */ transition: all 0.10s ease; padding: 5px; box-shadow: 1px 1px 1px; } [data-tooltip]:hover:before { /* needed - do not touch */ opacity: 1; /* customizable */ background: white; margin-top: -50px; /*margin-left: 20px;*/ }";
+  // Append Stylesheet
+  var filterCss = '.filterDetails {margin: -1px -14px !important; border-radius: 0px !important;}\
+    #filterDetails span {padding: 0 5px; font-size: 12px;}\
+    #filterCaption {cursor: pointer; display: flex; border-top-left-radius: 4px; border-top-right-radius: 4px; font:700 14px/22px "Open Sans",sans-serif !important; margin: 0px -13px; padding: 5px 10px; border: none;}\
+    #filterHide {border-top-right-radius: 0px; border-top-left-radius: 0px; margin: 1px -14px -1px; padding: 5px 0px; justify-content: center; cursor: pointer;}\
+    #filterControls {margin-bottom: 5px; background-image: none;}\
+    #filterControls select, #filterControls input {padding: 2px 4px;}\
+    #filterHide.sidebar__navigation__item__link, #filterHide.sidebar__navigation__item__link:hover {border-top: none;}\
+    .filterCheckbox {width: 13px; margin: 5px;}\
+    .filterNumberInput {margin: 5px 0;}\
+    .enableContainer, .excludeContainer {margin-top: 3px;}\
+    .enableContainer.markdown hr, .excludeContainer.markdown hr, .filteringContainer.markdown hr {margin: 0px;}\
+    .otherContainer {padding: 5px 0;}\
+    .filteringContainer{padding-top: 1px;}\
+    .flexLeft {display: flex; align-items: center; justify-content: flex-start; flex-grow: 1; flex-basis: 0px;}\
+    .flexCenter {display: flex; align-items: center; justify-content: center; flex-grow: 1; flex-basis: 0px; margin-top: -1px;}\
+    .flexRight {display: flex; align-items: center; justify-content: flex-end; flex-grow: 1; flex-basis: 0px;}\
+    .help-tip {text-align: center; border-style: dotted; border-width: 1px; margin-left: 2px; margin-right: -5px; padding: 1px; cursor: help;}\
+    .sidebar__shortcut-tooltip-absolute.tooltip {display: none; box-shadow: none; padding: 8px !important; margin-left: -275px; margin-top: 10px; width: 406px; line-height: 16px; -webkit-filter: saturate(0); filter: saturate(0); }\
+    .sidebar__shortcut-tooltip-absolute, .table__row-outer-wrap {color:inherit;}\
+    .help-tip:hover .sidebar__shortcut-tooltip-absolute.tooltip {display: block;}';
+
   var style = document.createElement('style');
   if (style.styleSheet) {
-    style.styleSheet.cssText = captionHoverCss;
+    style.styleSheet.cssText = filterCss;
   } else {
-    style.appendChild(document.createTextNode(captionHoverCss));
+    style.appendChild(document.createTextNode(filterCss));
   }
   document.getElementsByTagName('head')[0].appendChild(style);
 
@@ -540,14 +551,6 @@ function isCurrentPage(pageKey) {
 function createFilterUiCaptionRow() {
   var filterOptionsCaption = document.createElement("div");
   filterOptionsCaption.id = FILTER_CAPTION_ID;
-  filterOptionsCaption.style.display = "flex";
-  filterOptionsCaption.style.fontWeight = "700";
-  filterOptionsCaption.style.paddingTop = "5px";
-  filterOptionsCaption.style.paddingBottom = "5px";
-  filterOptionsCaption.style.paddingLeft = "10px";
-  filterOptionsCaption.style.paddingRight = "10px";
-  filterOptionsCaption.style.cursor = "pointer";
-  filterOptionsCaption.style.font = '700 14px/22px "Open Sans",sans-serif';
   filterOptionsCaption.appendChild(document.createTextNode(getFilterCaption()));
   filterOptionsCaption.onclick = function() {
     // Clicking on the caption opens/closes the filter details UI
@@ -574,6 +577,7 @@ function createFilterUiFilterOptionsRow() {
   var minLevelToDisplayInput = document.createElement("input");
   minLevelToDisplayInput.setAttribute("type", "number");
   minLevelToDisplayInput.setAttribute("maxLength", "2");
+  minLevelToDisplayInput.setAttribute("class", "filterNumberInput");
   minLevelToDisplayInput.style.width = "55px";
   minLevelToDisplayInput.value = minLevelToDisplay;
   minLevelToDisplayInput.onchange = function() {
@@ -627,20 +631,12 @@ function createFilterUiFilterOptionsRow() {
   // Create and add the level filter
   var showLevelSpan = document.createElement("span");
   showLevelSpan.appendChild(document.createTextNode("Show level:"));
-  showLevelSpan.style.paddingRight = "5px";
 
   var levelDashSpan = document.createElement("span");
   levelDashSpan.appendChild(document.createTextNode("-"));
-  levelDashSpan.style.paddingRight = "5px";
-  levelDashSpan.style.paddingLeft = "5px";
 
   var flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.setAttribute("class", "flexLeft");
   flexGrowLeftDiv.appendChild(showLevelSpan);
   flexGrowLeftDiv.appendChild(minLevelToDisplayInput);
   flexGrowLeftDiv.appendChild(levelDashSpan);
@@ -703,20 +699,12 @@ function createFilterUiFilterOptionsRow() {
   // Create and add the points filter
   var showPointsSpan = document.createElement("span");
   showPointsSpan.appendChild(document.createTextNode("Points to enter:"));
-  showPointsSpan.style.paddingRight = "5px";
 
   var pointsDashSpan = document.createElement("span");
   pointsDashSpan.appendChild(document.createTextNode("-"));
-  pointsDashSpan.style.paddingRight = "5px";
-  pointsDashSpan.style.paddingLeft = "5px";
 
   var flexGrowCenterDiv = document.createElement("div");
-  flexGrowCenterDiv.style.display = "flex";
-  flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "center";
-  flexGrowCenterDiv.style.flexGrow = "1";
-  flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
   flexGrowCenterDiv.appendChild(showPointsSpan);
   flexGrowCenterDiv.appendChild(minPointsToDisplayInput);
   flexGrowCenterDiv.appendChild(pointsDashSpan);
@@ -725,8 +713,7 @@ function createFilterUiFilterOptionsRow() {
   // The "enable filtering by entry count" input checkbox
   var enableFilteringByEntryCountInput = document.createElement("input");
   enableFilteringByEntryCountInput.setAttribute("type", "checkbox");
-  enableFilteringByEntryCountInput.style.width = "13px";
-  enableFilteringByEntryCountInput.style.marginLeft = "9px";
+  enableFilteringByEntryCountInput.setAttribute("class", "filterCheckbox");
   enableFilteringByEntryCountInput.checked = enableFilteringByEntryCount;
   enableFilteringByEntryCountInput.onclick = function() {
     // Upon value change, enable and recolor the entry count input
@@ -734,11 +721,10 @@ function createFilterUiFilterOptionsRow() {
     maxNumberOfEntriesInput.disabled = !enableFilteringByEntryCountInput.checked;
     maxNumberOfEntriesInput.readOnly = !enableFilteringByEntryCountInput.checked;
     if (!enableFilteringByEntryCountInput.checked) {
-      maxNumberOfEntriesInput.style.color = "#888";
-      maxNumberOfEntriesInput.style.backgroundColor = "#E8EAEF";
+      maxNumberOfEntriesInput.style.opacity = "0.4";
     } else {
-      maxNumberOfEntriesInput.style.color = maxNumberOfEntriesInputOriginalTextColor;
-      maxNumberOfEntriesInput.style.backgroundColor = "#FFFFFF";
+      maxNumberOfEntriesInput.style.opacity = maxNumberOfEntriesInputOriginalOpacity;
+	  maxNumberOfEntriesInput.style.opacity = "1";
     }
     // Update the main UI
     updateFilterCaption();
@@ -771,47 +757,38 @@ function createFilterUiFilterOptionsRow() {
     return isDigit(event.charCode);
   };
 
-  var maxNumberOfEntriesInputOriginalTextColor = maxNumberOfEntriesInput.style.color;
+  var maxNumberOfEntriesInputOriginalOpacity = maxNumberOfEntriesInput.style.opacity;
   // Gray out the input text if disabled
   if (!enableFilteringByEntryCount) {
-    maxNumberOfEntriesInput.style.color = "#888";
-    maxNumberOfEntriesInput.style.backgroundColor = "#E8EAEF";
+    maxNumberOfEntriesInput.style.opacity = "0.4";
   }
 
   // Create and add the entry count filter
   var entryFilteringEnabledSpan = document.createElement("span");
   entryFilteringEnabledSpan.appendChild(document.createTextNode("Entry count filtering"));
-  entryFilteringEnabledSpan.style.display = "flex";
-  entryFilteringEnabledSpan.style.flexGrow = "1";
-  entryFilteringEnabledSpan.style.flexBasis = "0";
 
   var entryFilteringCountSpan = document.createElement("span");
   entryFilteringCountSpan.appendChild(document.createTextNode("Max # of entries:"));
-  entryFilteringCountSpan.style.paddingRight = "5px";
-  entryFilteringCountSpan.style.paddingLeft = "10px";
 
   var flexGrowRightDiv = document.createElement("div");
-  flexGrowRightDiv.style.display = "flex";
-  flexGrowRightDiv.style.alignItems = "center";
-  flexGrowRightDiv.style.justifyContent = "flex-end";
-  flexGrowRightDiv.style.flexGrow = "1";
-  flexGrowRightDiv.style.flexBasis = "0";
-  flexGrowRightDiv.align = "right";
+  flexGrowRightDiv.setAttribute("class", "flexRight");
   flexGrowRightDiv.appendChild(entryFilteringEnabledSpan);
   flexGrowRightDiv.appendChild(enableFilteringByEntryCountInput);
   flexGrowRightDiv.appendChild(entryFilteringCountSpan);
   flexGrowRightDiv.appendChild(maxNumberOfEntriesInput);
 
   // Create the row itself
+  var firstRow = document.createElement("div");
+  firstRow.setAttribute("class", "flexCenter");
+  firstRow.appendChild(flexGrowLeftDiv);
+  firstRow.appendChild(flexGrowCenterDiv);
+  firstRow.appendChild(flexGrowRightDiv);
+
   var row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.alignItems = "center";
-  row.style.paddingTop = "5px";
-  row.style.paddingBottom = "5px";
-  row.style.borderTop = "1px solid #d2d6e0";
-  row.appendChild(flexGrowLeftDiv);
-  row.appendChild(flexGrowCenterDiv);
-  row.appendChild(flexGrowRightDiv);
+  var hr = document.createElement("hr");
+  row.setAttribute("class", 'filteringContainer markdown');
+  row.appendChild(firstRow);
+  row.appendChild(hr);
   return row;
 }
 
@@ -825,8 +802,7 @@ function createFilterUiExcludeOptionsRow() {
   // The "exlude group GAs" input checkbox
   var excludeGroupGiveawaysInput = document.createElement("input");
   excludeGroupGiveawaysInput.setAttribute("type", "checkbox");
-  excludeGroupGiveawaysInput.style.width = "13px";
-  excludeGroupGiveawaysInput.style.marginLeft = "9px";
+  excludeGroupGiveawaysInput.setAttribute("class", "filterCheckbox");
   excludeGroupGiveawaysInput.checked = excludeGroupGiveaways;
   excludeGroupGiveawaysInput.onclick = function() {
     // Save the change and update the UI
@@ -840,20 +816,14 @@ function createFilterUiExcludeOptionsRow() {
 
   // Create and add the group GAs exclusion element
   var flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.setAttribute("class", "flexLeft");
   flexGrowLeftDiv.appendChild(excludeGroupGiveawaysSpan);
   flexGrowLeftDiv.appendChild(excludeGroupGiveawaysInput);
 
   // The "exlude whitelist GAs" input checkbox
   var excludeWhitelistGiveawaysInput = document.createElement("input");
   excludeWhitelistGiveawaysInput.setAttribute("type", "checkbox");
-  excludeWhitelistGiveawaysInput.style.width = "13px";
-  excludeWhitelistGiveawaysInput.style.marginLeft = "9px";
+  excludeWhitelistGiveawaysInput.setAttribute("class", "filterCheckbox");
   excludeWhitelistGiveawaysInput.checked = excludeWhitelistGiveaways;
   excludeWhitelistGiveawaysInput.onclick = function() {
     // If the value changed, save it and update the UI
@@ -867,20 +837,14 @@ function createFilterUiExcludeOptionsRow() {
 
   // Create and add the whitelist GAs exclusion element
   var flexGrowCenterDiv = document.createElement("div");
-  flexGrowCenterDiv.style.display = "flex";
-  flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "center";
-  flexGrowCenterDiv.style.flexGrow = "1";
-  flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
   flexGrowCenterDiv.appendChild(excludeWhitelistGiveawaysSpan);
   flexGrowCenterDiv.appendChild(excludeWhitelistGiveawaysInput);
 
   // The "exclude pinned giveaways" input checkbox
   var excludePinnedGiveawaysInput = document.createElement("input");
   excludePinnedGiveawaysInput.setAttribute("type", "checkbox");
-  excludePinnedGiveawaysInput.style.width = "13px";
-  excludePinnedGiveawaysInput.style.marginLeft = "9px";
+  excludePinnedGiveawaysInput.setAttribute("class", "filterCheckbox");
   excludePinnedGiveawaysInput.checked = excludePinnedGiveaways;
   excludePinnedGiveawaysInput.onclick = function() {
     // Upon value change
@@ -896,22 +860,13 @@ function createFilterUiExcludeOptionsRow() {
 
   // Create and add the "exclude pinned giveaways" text
   var flexGrowRightDiv = document.createElement("div");
-  flexGrowRightDiv.style.display = "flex";
-  flexGrowRightDiv.style.alignItems = "center";
-  flexGrowRightDiv.style.justifyContent = "flex-end";
-  flexGrowRightDiv.style.flexGrow = "1";
-  flexGrowRightDiv.style.flexBasis = "0";
-  flexGrowRightDiv.align = "right";
+  flexGrowRightDiv.setAttribute("class", "flexRight");
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysSpan);
   flexGrowRightDiv.appendChild(excludePinnedGiveawaysInput);
 
   // Create the first row
   var firstRow = document.createElement("div");
-  firstRow.style.display = "flex";
-  firstRow.style.alignItems = "center";
-  firstRow.style.paddingTop = "5px";
-  firstRow.style.paddingBottom = "5px";
-  firstRow.style.borderTop = "1px solid #d2d6e0";
+  firstRow.setAttribute("class", "flexCenter");
   firstRow.appendChild(flexGrowLeftDiv);
   firstRow.appendChild(flexGrowCenterDiv);
   firstRow.appendChild(flexGrowRightDiv);
@@ -919,8 +874,7 @@ function createFilterUiExcludeOptionsRow() {
   // The "exclude region-restricted giveaways" input checkbox
   var excludeRegionRestrictedGiveawaysInput = document.createElement("input");
   excludeRegionRestrictedGiveawaysInput.setAttribute("type", "checkbox");
-  excludeRegionRestrictedGiveawaysInput.style.width = "13px";
-  excludeRegionRestrictedGiveawaysInput.style.marginLeft = "9px";
+  excludeRegionRestrictedGiveawaysInput.setAttribute("class", "filterCheckbox");
   excludeRegionRestrictedGiveawaysInput.checked = excludeRegionRestrictedGiveaways;
   excludeRegionRestrictedGiveawaysInput.onclick = function() {
     // Upon value change
@@ -937,27 +891,22 @@ function createFilterUiExcludeOptionsRow() {
 
   // Create the "exclude region-restricted giveaways" element itself
   flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "center";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "center";
+  flexGrowLeftDiv.setAttribute("class", "flexCenter");
   flexGrowLeftDiv.appendChild(excludeRegionRestrictedGiveawaysSpan);
   flexGrowLeftDiv.appendChild(excludeRegionRestrictedGiveawaysInput);
 
   // Create the second row in the filter details
   var secondRow = document.createElement("div");
-  secondRow.style.display = "flex";
-  secondRow.style.alignItems = "center";
-  secondRow.style.paddingTop = "5px";
-  secondRow.style.paddingBottom = "5px";
+  secondRow.setAttribute("class", "flexCenter");
   secondRow.appendChild(flexGrowLeftDiv);
 
   // Create the row itself
   var row = document.createElement("div");
+  var hr = document.createElement("hr");
+  row.setAttribute("class", 'excludeContainer markdown');
   row.appendChild(firstRow);
   row.appendChild(secondRow);
+  row.appendChild(hr);
   return row;
 }
 
@@ -972,12 +921,7 @@ function createFilterUiEnabledPagesRow() {
 
   // Create and add the "enable filtering on the main page" text
   var flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.setAttribute("class", "flexLeft");
   var enableFilteringOnTheMainPageSpan = document.createElement("span");
   enableFilteringOnTheMainPageSpan.appendChild(document.createTextNode("Enable on the main page"));
   if (isCurrentPage(KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW)) {
@@ -988,8 +932,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the main page" input checkbox
   var enableFilteringOnTheMainPageInput = document.createElement("input");
   enableFilteringOnTheMainPageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheMainPageInput.style.width = "13px";
-  enableFilteringOnTheMainPageInput.style.marginLeft = "9px";
+  enableFilteringOnTheMainPageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheMainPageInput.checked = applyToAllGiveawaysView;
   enableFilteringOnTheMainPageInput.onclick = function() {
     // Upon value change
@@ -1003,12 +946,7 @@ function createFilterUiEnabledPagesRow() {
 
   // Create and add the "enable filtering on the new giveaways page" text
   var flexGrowCenterDiv = document.createElement("div");
-  flexGrowCenterDiv.style.display = "flex";
-  flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "center";
-  flexGrowCenterDiv.style.flexGrow = "1";
-  flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
   var enableFilteringOnTheNewGiveawaysPageSpan = document.createElement("span");
   enableFilteringOnTheNewGiveawaysPageSpan.appendChild(document.createTextNode('Enable on the "new giveaways" page'));
   if (isCurrentPage(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW)) {
@@ -1019,8 +957,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the new giveaways page" input checkbox
   var enableFilteringOnTheNewGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheNewGiveawaysPageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheNewGiveawaysPageInput.style.width = "13px";
-  enableFilteringOnTheNewGiveawaysPageInput.style.marginLeft = "9px";
+  enableFilteringOnTheNewGiveawaysPageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheNewGiveawaysPageInput.checked = applyToNewGiveawaysView;
   enableFilteringOnTheNewGiveawaysPageInput.onclick = function() {
     // Upon value change
@@ -1034,12 +971,7 @@ function createFilterUiEnabledPagesRow() {
 
   // Create and add the "enable filtering on the search results" text
   var flexGrowRightDiv = document.createElement("div");
-  flexGrowRightDiv.style.display = "flex";
-  flexGrowRightDiv.style.alignItems = "center";
-  flexGrowRightDiv.style.justifyContent = "flex-end";
-  flexGrowRightDiv.style.flexGrow = "1";
-  flexGrowRightDiv.style.flexBasis = "0";
-  flexGrowRightDiv.align = "right";
+  flexGrowRightDiv.setAttribute("class", "flexRight");
   var enableFilteringOnTheSearchResultsPageSpan = document.createElement("span");
   enableFilteringOnTheSearchResultsPageSpan.appendChild(document.createTextNode('Enable on the "search results" page'));
   if (isCurrentPage(KEY_APPLY_TO_SEARCH_RESULTS_VIEW)) {
@@ -1050,8 +982,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the search results" input checkbox
   var enableFilteringOnTheSearchResultsPageInput = document.createElement("input");
   enableFilteringOnTheSearchResultsPageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheSearchResultsPageInput.style.width = "13px";
-  enableFilteringOnTheSearchResultsPageInput.style.marginLeft = "9px";
+  enableFilteringOnTheSearchResultsPageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheSearchResultsPageInput.checked = applyToSearchResultsView;
   enableFilteringOnTheSearchResultsPageInput.onclick = function() {
     // Upon value change
@@ -1065,23 +996,14 @@ function createFilterUiEnabledPagesRow() {
 
   // Create the first row in the filter details
   var firstRow = document.createElement("div");
-  firstRow.style.display = "flex";
-  firstRow.style.alignItems = "center";
-  firstRow.style.paddingTop = "5px";
-  firstRow.style.paddingBottom = "5px";
-  firstRow.style.borderTop = "1px solid #d2d6e0";
+  firstRow.setAttribute("class", "flexCenter");
   firstRow.appendChild(flexGrowLeftDiv);
   firstRow.appendChild(flexGrowCenterDiv);
   firstRow.appendChild(flexGrowRightDiv);
 
   // Create and add the "enable filtering on the wishlist giveaways page" text
   flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "flex-start";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "left";
+  flexGrowLeftDiv.setAttribute("class", "flexLeft");
   var enableFilteringOnTheWishlistGiveawaysPageSpan = document.createElement("span");
   enableFilteringOnTheWishlistGiveawaysPageSpan.appendChild(document.createTextNode('Enable on the "wishlist giveaways" page'));
   if (isCurrentPage(KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW)) {
@@ -1092,8 +1014,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the wishlist giveaways page" input checkbox
   var enableFilteringOnTheWishlistGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheWishlistGiveawaysPageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheWishlistGiveawaysPageInput.style.width = "13px";
-  enableFilteringOnTheWishlistGiveawaysPageInput.style.marginLeft = "9px";
+  enableFilteringOnTheWishlistGiveawaysPageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheWishlistGiveawaysPageInput.checked = applyToWishlistGiveawaysView;
   enableFilteringOnTheWishlistGiveawaysPageInput.onclick = function() {
     // Upon value change
@@ -1107,12 +1028,7 @@ function createFilterUiEnabledPagesRow() {
 
   // Create and add the "enable filtering on the "group giveaways" page" text
   flexGrowCenterDiv = document.createElement("div");
-  flexGrowCenterDiv.style.display = "flex";
-  flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "center";
-  flexGrowCenterDiv.style.flexGrow = "1";
-  flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
   var enableFilteringOnTheGroupGiveawaysPageSpan = document.createElement("span");
   enableFilteringOnTheGroupGiveawaysPageSpan.appendChild(document.createTextNode('Enable on the "group giveaways" page'));
   if (isCurrentPage(KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW)) {
@@ -1123,8 +1039,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the "group giveaways" page" page" input checkbox
   var enableFilteringOnTheGroupGiveawaysPageInput = document.createElement("input");
   enableFilteringOnTheGroupGiveawaysPageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheGroupGiveawaysPageInput.style.width = "13px";
-  enableFilteringOnTheGroupGiveawaysPageInput.style.marginLeft = "9px";
+  enableFilteringOnTheGroupGiveawaysPageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheGroupGiveawaysPageInput.checked = applyToGroupGiveawaysView;
   enableFilteringOnTheGroupGiveawaysPageInput.onclick = function() {
     // Upon value change
@@ -1138,12 +1053,7 @@ function createFilterUiEnabledPagesRow() {
 
   // Create and add the "enable filtering on the user profile page" text
   flexGrowRightDiv = document.createElement("div");
-  flexGrowRightDiv.style.display = "flex";
-  flexGrowRightDiv.style.alignItems = "center";
-  flexGrowRightDiv.style.justifyContent = "flex-end";
-  flexGrowRightDiv.style.flexGrow = "1";
-  flexGrowRightDiv.style.flexBasis = "0";
-  flexGrowRightDiv.align = "right";
+  flexGrowRightDiv.setAttribute("class", "flexRight");
   var enableFilteringOnTheUserProfilePageSpan = document.createElement("span");
   enableFilteringOnTheUserProfilePageSpan.appendChild(document.createTextNode('Enable on the "user profile" page'));
   if (isCurrentPage(KEY_APPLY_TO_USER_PROFILE_VIEW)) {
@@ -1154,8 +1064,7 @@ function createFilterUiEnabledPagesRow() {
   // The "enable filtering on the user profile page" input checkbox
   var enableFilteringOnTheUserProfilePageInput = document.createElement("input");
   enableFilteringOnTheUserProfilePageInput.setAttribute("type", "checkbox");
-  enableFilteringOnTheUserProfilePageInput.style.width = "13px";
-  enableFilteringOnTheUserProfilePageInput.style.marginLeft = "9px";
+  enableFilteringOnTheUserProfilePageInput.setAttribute("class", "filterCheckbox");
   enableFilteringOnTheUserProfilePageInput.checked = applyToUserProfileView;
   enableFilteringOnTheUserProfilePageInput.onclick = function() {
     // Upon value change
@@ -1169,18 +1078,18 @@ function createFilterUiEnabledPagesRow() {
 
   // Create the second row in the filter details
   var secondRow = document.createElement("div");
-  secondRow.style.display = "flex";
-  secondRow.style.alignItems = "center";
-  secondRow.style.paddingTop = "5px";
-  secondRow.style.paddingBottom = "5px";
+  secondRow.setAttribute("class", "flexCenter");
   secondRow.appendChild(flexGrowLeftDiv);
   secondRow.appendChild(flexGrowCenterDiv);
   secondRow.appendChild(flexGrowRightDiv);
 
   // Create the row itself
   var row = document.createElement("div");
+  var hr = document.createElement("hr");
+  row.setAttribute("class", "enableContainer markdown");
   row.appendChild(firstRow);
   row.appendChild(secondRow);
+  row.appendChild(hr);
   return row;
 }
 
@@ -1192,8 +1101,7 @@ function createFilterUiOtherOptionsRow() {
   // The "remove pagination" input checkbox
   var removePaginationInput = document.createElement("input");
   removePaginationInput.setAttribute("type", "checkbox");
-  removePaginationInput.style.width = "13px";
-  removePaginationInput.style.marginLeft = "9px";
+  removePaginationInput.setAttribute("class", "filterCheckbox");
   removePaginationInput.checked = removePagination;
   removePaginationInput.onclick = function() {
     // Save the change and update the UI
@@ -1206,16 +1114,11 @@ function createFilterUiOtherOptionsRow() {
 
   // Create and add the group GAs exclusion element
   var flexGrowLeftDiv = document.createElement("div");
-  flexGrowLeftDiv.style.display = "flex";
-  flexGrowLeftDiv.style.alignItems = "center";
-  flexGrowLeftDiv.style.justifyContent = "center";
-  flexGrowLeftDiv.style.flexGrow = "1";
-  flexGrowLeftDiv.style.flexBasis = "0";
-  flexGrowLeftDiv.align = "center";
+  flexGrowLeftDiv.setAttribute("class", "flexCenter");
   flexGrowLeftDiv.appendChild(removePaginationSpan);
   flexGrowLeftDiv.appendChild(removePaginationInput);
 
-  // The "remove pagination" input checkbox
+  // The "hide entered giveaways" input checkbox
   var hideEnteredGiveawaysSelect = document.createElement("select");
   for ( i = 0; i < HIDE_ENTERED_GIVEAWAYS_CONSTANTS.length; i++ ) {
     var option = document.createElement('option');
@@ -1224,7 +1127,7 @@ function createFilterUiOtherOptionsRow() {
   }
 
   hideEnteredGiveawaysSelect.value = hideEnteredGiveaways;
-  hideEnteredGiveawaysSelect.style.width = "90px";
+  hideEnteredGiveawaysSelect.style.width = "75px";
   hideEnteredGiveawaysSelect.style.marginLeft = "9px";
   hideEnteredGiveawaysSelect.onchange = function() {
     // Save the change and update the UI
@@ -1236,29 +1139,24 @@ function createFilterUiOtherOptionsRow() {
   var hideEnteredGiveawaysSpan = document.createElement("span");
   hideEnteredGiveawaysSpan.appendChild(document.createTextNode("Hide entered giveaways"));
   var helpTooltip = document.createElement("div");
-  helpTooltip.dataset.tooltip = '"Yes" hides entered giveaways, but exclusions still apply. "Always" hides entered giveaways no matter the other filter options.';
-  helpTooltip.className = "help-tip";
+  var tooltip = document.createElement("span");
+
+  tooltip.setAttribute("class", "sidebar__shortcut-tooltip-absolute tooltip");
+  tooltip.appendChild(document.createTextNode('"Yes" hides entered giveaways, although exclusions still apply. "Always" hides entered giveaways no matter the other filter options.'));
+  helpTooltip.setAttribute("class", "help-tip");
   helpTooltip.appendChild(document.createTextNode("?"));
+  helpTooltip.appendChild(tooltip);
 
   // Create and add the group GAs exclusion element
   var flexGrowCenterDiv = document.createElement("div");
-  flexGrowCenterDiv.style.display = "flex";
-  flexGrowCenterDiv.style.alignItems = "center";
-  flexGrowCenterDiv.style.justifyContent = "center";
-  flexGrowCenterDiv.style.flexGrow = "1";
-  flexGrowCenterDiv.style.flexBasis = "0";
-  flexGrowCenterDiv.align = "center";
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
   flexGrowCenterDiv.appendChild(hideEnteredGiveawaysSpan);
   flexGrowCenterDiv.appendChild(helpTooltip);
   flexGrowCenterDiv.appendChild(hideEnteredGiveawaysSelect);
 
   // Create the row itself
   var row = document.createElement("div");
-  row.style.display = "flex";
-  row.style.alignItems = "center";
-  row.style.paddingTop = "5px";
-  row.style.paddingBottom = "5px";
-  row.style.borderTop = "1px solid #d2d6e0";
+  row.setAttribute("class", "otherContainer flexCenter");
   row.appendChild(flexGrowLeftDiv);
   row.appendChild(flexGrowCenterDiv);
   return row;
@@ -1268,11 +1166,7 @@ function createFilterUiOtherOptionsRow() {
 function createFilterUiHideFilterDetailsRow() {
   var hideControlsDiv = document.createElement("div");
   hideControlsDiv.id = FILTER_HIDE_ID;
-  hideControlsDiv.style.textAlign = "center";
-  hideControlsDiv.style.paddingTop = "5px";
-  hideControlsDiv.style.paddingBottom = "5px";
-  hideControlsDiv.style.borderTop = "1px solid #d2d6e0";
-  hideControlsDiv.style.cursor = "pointer";
+  hideControlsDiv.setAttribute("class", 'pinned-giveaways__inner-wrap sidebar__navigation__item__link');
   hideControlsDiv.appendChild(document.createTextNode("Hide filter options"));
   hideControlsDiv.onclick = function() {
     // Hide the filter details
@@ -1316,6 +1210,7 @@ function insertFilterUi(filterUi) {
 function updateFilterCaption() {
   var filterCaptionDiv = document.getElementById(FILTER_CAPTION_ID);
   filterCaptionDiv.innerHTML = getFilterCaption();
+  filterCaptionDiv.setAttribute("class", 'sidebar__navigation__item__name pinned-giveaways__inner-wrap sidebar__navigation__item__link');
   updateFilterCaptionTextColor();
 }
 
@@ -1323,9 +1218,9 @@ function updateFilterCaption() {
 function updateFilterCaptionTextColor() {
   var filterCaptionDiv = document.getElementById(FILTER_CAPTION_ID);
   if (isFilteringEnabledOnCurrentPage()) {
-    filterCaptionDiv.style.color = "#4B72D4";
+    filterCaptionDiv.setAttribute("class", 'sidebar__navigation__item__name pinned-giveaways__inner-wrap sidebar__navigation__item__link');
   } else {
-    filterCaptionDiv.style.color = "#888888";
+    filterCaptionDiv.setAttribute("class", 'sidebar__heading pinned-giveaways__inner-wrap sidebar__navigation__item__link');
   }
 }
 
