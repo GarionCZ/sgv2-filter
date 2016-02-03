@@ -8,7 +8,7 @@
 // @include     http://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
-// @version     0.4.3-BETA
+// @version     0.5.4-BETA
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -1321,3 +1321,5 @@ var observeDOM = (function() {
 observeDOM(document, function() {
   filterGiveaways();
 });
+
+filterGiveaways();
