@@ -282,9 +282,13 @@ function getPoints(giveaway) {
 function getNumberOfEntries(giveaway) {
   // Parse from SGv2 layout
   var spanElements = giveaway.getElementsByTagName("span");
+  var copies = 1;
   for ( j = 0; j < spanElements.length; j++) {
+    if (spanElements[j].innerHTML.indexOf("Copies") != -1) {
+      copies = parseInt(spanElements[j].innerHTML.substring(1, spanElements[j].innerHTML.indexOf(" ")).replace(",", ""));
+    }
     if (spanElements[j].innerHTML.indexOf("entr") != -1) {
-      return parseInt(spanElements[j].innerHTML.substring(0, spanElements[j].innerHTML.indexOf(" ")).replace(",", ""));
+      return parseInt(spanElements[j].innerHTML.substring(0, spanElements[j].innerHTML.indexOf(" ")).replace(",", "")) / copies;
     }
   }
 
