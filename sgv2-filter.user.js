@@ -11,7 +11,7 @@
 // @include     https://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/master/sgv2-filter.meta.js
-// @version     0.5.4-DEV
+// @version     0.5.5-DEV
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -524,7 +524,8 @@ function isCurrentPage(pageKey) {
   updateFilterCaptionTextColor();
 
   // Append Stylesheet
-  var filterCss = '.filterDetails {margin: -1px -14px !important; border-radius: 0px !important;}\
+  var filterCss = '.giveaway__row-outer-wrap[data-gridview*="sgpp_gridview"] {display: none;}\
+    .filterDetails {margin: -1px -14px !important; border-radius: 0px !important;}\
     #filterDetails span {padding: 0 5px; font-size: 12px;}\
     #filterCaption {cursor: pointer; display: flex; border-top-left-radius: 4px; border-top-right-radius: 4px; font:700 14px/22px "Open Sans",sans-serif !important; margin: 0px -13px; padding: 5px 10px; border: none;}\
     #filterHide {border-top-right-radius: 0px; border-top-left-radius: 0px; margin: 1px -14px -1px; padding: 5px 0px; justify-content: center; cursor: pointer;}\
