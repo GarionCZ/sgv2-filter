@@ -6,9 +6,12 @@
 // @include     http://www.steamgifts.com/
 // @include     http://www.steamgifts.com/giveaways*
 // @include     http://www.steamgifts.com/user/*
+// @include     https://www.steamgifts.com/
+// @include     https://www.steamgifts.com/giveaways*
+// @include     https://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
-// @version     0.5.4-BETA
+// @version     0.5.5-BETA
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -467,24 +470,27 @@ function isFilteringEnabledOnCurrentPage() {
 function isCurrentPage(pageKey) {
   var currentPage = window.location.href;
   if (pageKey === KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0
-      || currentPage === "http://www.steamgifts.com" || currentPage === "http://www.steamgifts.com/"
+    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?page=") === 0
+      || currentPage === "https://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
+      || currentPage === "https://www.steamgifts.com/giveaways"
+      || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0
+      || currentPage === "http://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
       || currentPage === "http://www.steamgifts.com/giveaways");
   }
   if (pageKey === KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
+    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=group") === 0 || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
   }
   if (pageKey === KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
+    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=wishlist") === 0 || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
   }
   if (pageKey === KEY_APPLY_TO_USER_PROFILE_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/user/") === 0);
+    return (currentPage.indexOf("https://www.steamgifts.com/user/") === 0 || currentPage.indexOf("http://www.steamgifts.com/user/") === 0);
   }
   if (pageKey === KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=new") === 0);
+    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=new") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=new") === 0);
   }
   if (pageKey === KEY_APPLY_TO_SEARCH_RESULTS_VIEW) {
-    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?q") === 0);
+    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?q") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?q") === 0);
   }
   return false;
 }
@@ -518,7 +524,8 @@ function isCurrentPage(pageKey) {
   updateFilterCaptionTextColor();
 
   // Append Stylesheet
-  var filterCss = '.filterDetails {margin: -1px -14px !important; border-radius: 0px !important;}\
+  var filterCss = '.giveaway__row-outer-wrap[data-gridview*="sgpp_gridview"] {display: none;}\
+    .filterDetails {margin: -1px -14px !important; border-radius: 0px !important;}\
     #filterDetails span {padding: 0 5px; font-size: 12px;}\
     #filterCaption {cursor: pointer; display: flex; border-top-left-radius: 4px; border-top-right-radius: 4px; font:700 14px/22px "Open Sans",sans-serif !important; margin: 0px -13px; padding: 5px 10px; border: none;}\
     #filterHide {border-top-right-radius: 0px; border-top-left-radius: 0px; margin: 1px -14px -1px; padding: 5px 0px; justify-content: center; cursor: pointer;}\
