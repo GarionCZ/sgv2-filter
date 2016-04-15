@@ -11,7 +11,7 @@
 // @include     https://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/beta/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/beta/sgv2-filter.meta.js
-// @version     0.5.5-BETA
+// @version     0.5.6-BETA
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -33,6 +33,7 @@ var KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = "applyToWishlistGiveawaysView";
 var KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW = "applyToNewGiveawaysView";
 var KEY_APPLY_TO_USER_PROFILE_VIEW = "applyToUserProfileView";
 var KEY_APPLY_TO_SEARCH_RESULTS_VIEW = "applyToSearchResultsView";
+var KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW = "applyToRecommendedGiveawaysView";
 var KEY_REMOVE_PAGINATION = "removePagination";
 var KEY_HIDE_ENTERED_GIVEAWAYS = "hideEnteredGiveaways_2";
 var HIDE_ENTERED_GIVEAWAYS_CONSTANTS = ["No", "Yes", "Always"];
@@ -54,6 +55,7 @@ var DEFAULT_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW = false;
 var DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW = true;
 var DEFAULT_APPLY_TO_USER_PROFILE_VIEW = false;
 var DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW = false;
+var DEFAULT_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW = false;
 var DEFAULT_REMOVE_PAGINATION = true;
 var DEFAULT_HIDE_ENTERED_GIVEAWAYS = HIDE_ENTERED_GIVEAWAYS_CONSTANTS[0];
 
@@ -439,6 +441,7 @@ function isFilteringEnabledOnCurrentPage() {
   var applyToNewGiveawaysView = GM_getValue(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW);
   var applyToUserProfileView = GM_getValue(KEY_APPLY_TO_USER_PROFILE_VIEW, DEFAULT_APPLY_TO_USER_PROFILE_VIEW);
   var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW);
+  var applyToRecommendedView = GM_getValue(KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW);
 
   if (applyToAllGiveawaysView && isCurrentPage(KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW)) {
     return true;
@@ -464,6 +467,10 @@ function isFilteringEnabledOnCurrentPage() {
     return true;
   }
 
+  if (applyToRecommendedView && isCurrentPage(KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW)) {
+    return true;
+  }
+
   return false;
 }
 
@@ -471,26 +478,29 @@ function isCurrentPage(pageKey) {
   var currentPage = window.location.href;
   if (pageKey === KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW) {
     return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?page=") === 0
-      || currentPage === "https://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
+      || currentPage === "https://www.steamgifts.com"
       || currentPage === "https://www.steamgifts.com/giveaways"
       || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0
-      || currentPage === "http://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
+      || currentPage === "http://www.steamgifts.com"
       || currentPage === "http://www.steamgifts.com/giveaways");
   }
   if (pageKey === KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=group") === 0 || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=group") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=group") === 0);
   }
   if (pageKey === KEY_APPLY_TO_WISHLIST_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=wishlist") === 0 || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=wishlist") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=wishlist") === 0);
   }
   if (pageKey === KEY_APPLY_TO_USER_PROFILE_VIEW) {
-    return (currentPage.indexOf("https://www.steamgifts.com/user/") === 0 || currentPage.indexOf("http://www.steamgifts.com/user/") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/user/") === 0 || currentPage.indexOf("https://www.steamgifts.com/user/") === 0);
   }
   if (pageKey === KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW) {
-    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=new") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=new") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=new") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=new") === 0);
   }
   if (pageKey === KEY_APPLY_TO_SEARCH_RESULTS_VIEW) {
-    return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?q") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?q") === 0);
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?q") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?q") === 0);
+  }
+  if (pageKey === KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW) {
+    return (currentPage.indexOf("http://www.steamgifts.com/giveaways/search?type=recommended") === 0 || currentPage.indexOf("https://www.steamgifts.com/giveaways/search?type=recommended") === 0);
   }
   return false;
 }
@@ -927,6 +937,7 @@ function createFilterUiEnabledPagesRow() {
   var applyToNewGiveawaysView = GM_getValue(KEY_APPLY_TO_NEW_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_NEW_GIVEAWAYS_VIEW);
   var applyToUserProfileView = GM_getValue(KEY_APPLY_TO_USER_PROFILE_VIEW, DEFAULT_APPLY_TO_USER_PROFILE_VIEW);
   var applyToSearchResultsView = GM_getValue(KEY_APPLY_TO_SEARCH_RESULTS_VIEW, DEFAULT_APPLY_TO_SEARCH_RESULTS_VIEW);
+  var applyToRecommendedGiveawaysView = GM_getValue(KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW, DEFAULT_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW);
 
   // Create and add the "enable filtering on the main page" text
   var flexGrowLeftDiv = document.createElement("div");
@@ -1092,12 +1103,43 @@ function createFilterUiEnabledPagesRow() {
   secondRow.appendChild(flexGrowCenterDiv);
   secondRow.appendChild(flexGrowRightDiv);
 
+  // Create and add the "enable filtering on the wishlist giveaways page" text
+  flexGrowCenterDiv = document.createElement("div");
+  flexGrowCenterDiv.setAttribute("class", "flexCenter");
+  var enableFilteringOnTheRecommendedGiveawaysPageSpan = document.createElement("span");
+  enableFilteringOnTheRecommendedGiveawaysPageSpan.appendChild(document.createTextNode('Enable on the "recommended giveaways" page'));
+  if (isCurrentPage(KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW)) {
+    enableFilteringOnTheRecommendedGiveawaysPageSpan.appendChild(document.createTextNode(" (this page)"));
+  }
+  flexGrowCenterDiv.appendChild(enableFilteringOnTheRecommendedGiveawaysPageSpan);
+
+  // The "enable filtering on the wishlist giveaways page" input checkbox
+  var enableFilteringOnTheRecommendedGiveawaysPageInput = document.createElement("input");
+  enableFilteringOnTheRecommendedGiveawaysPageInput.setAttribute("type", "checkbox");
+  enableFilteringOnTheRecommendedGiveawaysPageInput.setAttribute("class", "filterCheckbox");
+  enableFilteringOnTheRecommendedGiveawaysPageInput.checked = applyToRecommendedGiveawaysView;
+  enableFilteringOnTheRecommendedGiveawaysPageInput.onclick = function() {
+    // Upon value change
+    GM_setValue(KEY_APPLY_TO_RECOMMENDED_GIVEAWAYS_VIEW, enableFilteringOnTheRecommendedGiveawaysPageInput.checked);
+    applyToRecommendedGiveawaysView = enableFilteringOnTheRecommendedGiveawaysPageInput.checked;
+    // Update the main UI
+    updateFilterCaption();
+    filterGiveaways();
+  };
+  flexGrowCenterDiv.appendChild(enableFilteringOnTheRecommendedGiveawaysPageInput);
+
+  // Create the third row in the filter details
+  var thirdRow = document.createElement("div");
+  thirdRow.setAttribute("class", "flexCenter");
+  thirdRow.appendChild(flexGrowCenterDiv);
+
   // Create the row itself
   var row = document.createElement("div");
   var hr = document.createElement("hr");
   row.setAttribute("class", "enableContainer markdown");
   row.appendChild(firstRow);
   row.appendChild(secondRow);
+  row.appendChild(thirdRow);
   row.appendChild(hr);
   return row;
 }
