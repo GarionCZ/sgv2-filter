@@ -11,7 +11,7 @@
 // @include     https://www.steamgifts.com/user/*
 // @downloadURL https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.user.js
 // @updateURL   https://github.com/GarionCZ/sgv2-filter/raw/release/sgv2-filter.meta.js
-// @version     0.5.6-BETA
+// @version     0.5.7-BETA
 // @grant       GM_getValue
 // @grant       GM_setValue
 // ==/UserScript==
@@ -478,10 +478,10 @@ function isCurrentPage(pageKey) {
   var currentPage = window.location.href;
   if (pageKey === KEY_APPLY_TO_ALL_GIVEAWAYS_VIEW) {
     return (currentPage.indexOf("https://www.steamgifts.com/giveaways/search?page=") === 0
-      || currentPage === "https://www.steamgifts.com"
+      || currentPage === "https://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
       || currentPage === "https://www.steamgifts.com/giveaways"
       || currentPage.indexOf("http://www.steamgifts.com/giveaways/search?page=") === 0
-      || currentPage === "http://www.steamgifts.com"
+      || currentPage === "http://www.steamgifts.com" || currentPage === "https://www.steamgifts.com/"
       || currentPage === "http://www.steamgifts.com/giveaways");
   }
   if (pageKey === KEY_APPLY_TO_GROUP_GIVEAWAYS_VIEW) {
